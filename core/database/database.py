@@ -6,7 +6,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlmodel import Session, SQLModel, create_engine
 
 from core.settings.default import AppSettings
-from core.database.crud import seed_from_yaml
+from core.database.load_database_data import seed_from_yaml
 
 logger = logging.getLogger(__name__)
 

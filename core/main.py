@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from core.database.database import init_db
 from core.settings.default import AppSettings, setup_logging
-from core.routers import api_router
+from core.settings.middleware import configure_middleware
+
+from core.routers import configure_routers
 
 app = FastAPI()
 
@@ -33,8 +35,8 @@ def boostrap(settings: AppSettings | None = None) -> FastAPI:
         redoc_url=settings.REDOCS_URL,
     )
     app.state.settings = settings
-    app.include_router(api_router)
-
+    configure_routers(app)
+    configure_middleware(app, settings)
     return app
 
 

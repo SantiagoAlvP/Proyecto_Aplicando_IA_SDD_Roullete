@@ -1,7 +1,7 @@
 import pytest
 import yaml
 from unittest.mock import MagicMock, patch
-from core.database.crud import seed_from_yaml
+from core.database.load_database_data import seed_from_yaml
 
 
 class TestSeedFromYaml:

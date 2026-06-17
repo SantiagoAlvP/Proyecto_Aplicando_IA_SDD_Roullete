@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Sequence
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +27,8 @@ class AppSettings(BaseSettings):
 
     # PRINT LOGS
     ENABLE_LOGS: bool = True
+
+    CORS_ALLOWED_ORIGINS: Sequence[str] = []
 
     @property
     def db_url(self) -> str:

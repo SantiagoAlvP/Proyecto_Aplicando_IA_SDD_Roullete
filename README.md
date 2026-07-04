@@ -1,5 +1,7 @@
 # Project Jackpot
 
+![](https://github.com/jero98772/project_roulette/blob/dev/docs/pictures/logo_animated.gif?raw=true)
+
 
 run tests
 

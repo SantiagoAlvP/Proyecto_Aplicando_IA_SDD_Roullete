@@ -7,14 +7,14 @@ from core.database.crud import (
     TechCRUD,
 )
 
-from core.ensable_project.api.ensable_project_validation import (
+from core.ensemble_project.api.ensemble_project_validation import (
     get_or_create_id,
     optional_id,
 )
-from core.ensable_project.api.ensable_project_models import Entity
+from core.ensemble_project.api.ensemble_project_models import Entity
 
 
-class EnsableProjectRepository:
+class EnsembleProjectRepository:
     def __init__(self, session: Session):
         self.session = session
 

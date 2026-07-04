@@ -143,11 +143,11 @@ def make_ai_gateway(
 def client_with_mocks(tmp_path):
     from fastapi import FastAPI
 
-    from core.ensable_project.api.ensable_project_router import (
+    from core.ensemble_project.api.ensemble_project_router import (
         router,
         get_project_service,
     )
-    from core.ensable_project.ensable_project_service import ProjectGeneratorService
+    from core.ensemble_project.ensemble_project_service import ProjectGeneratorService
 
     ai_gw = make_ai_gateway()
     catalog = make_catalog_repo()

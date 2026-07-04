@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-ENDPOINT = "/api/v1/ensable_project/generate_project_by_level"
+ENDPOINT = "/api/v1/ensemble_project/generate_project_by_level"
 
 
 @pytest.mark.parametrize("level", [1, 2, 3, 4, 5])
@@ -60,7 +60,7 @@ def test_candidates_count_matches_settings(client_with_mocks):
     client, ai_gw, _, _ = client_with_mocks
 
     with patch(
-        "core.ensable_project.ensable_project_service.AppSettings"
+        "core.ensemble_project.ensemble_project_service.AppSettings"
     ) as mock_settings:
         mock_settings.return_value.CANDIDATES = 4
         client.post(ENDPOINT, json={"level": 2})
@@ -73,7 +73,7 @@ def test_candidates_all_have_correct_level(client_with_mocks):
     client, ai_gw, _, _ = client_with_mocks
 
     with patch(
-        "core.ensable_project.ensable_project_service.AppSettings"
+        "core.ensemble_project.ensemble_project_service.AppSettings"
     ) as mock_settings:
         mock_settings.return_value.CANDIDATES = 3
         client.post(ENDPOINT, json={"level": 4})
@@ -104,7 +104,7 @@ def test_catalog_repo_queried_for_each_candidate(client_with_mocks):
     client, _, catalog, _ = client_with_mocks
 
     with patch(
-        "core.ensable_project.ensable_project_service.AppSettings"
+        "core.ensemble_project.ensemble_project_service.AppSettings"
     ) as mock_settings:
         mock_settings.return_value.CANDIDATES = 3
         client.post(ENDPOINT, json={"level": 1})

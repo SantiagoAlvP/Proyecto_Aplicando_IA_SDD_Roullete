@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from core.ensable_project.api.ensable_project_models import Entity
+from core.ensemble_project.api.ensemble_project_models import Entity
 
 
 def _resolve_id(session: Session, crud, name: str) -> int:

@@ -1,25 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from core.database.database import get_db
-from core.ensable_project.api.ensable_project_models import (
+from core.ensemble_project.api.ensemble_project_models import (
     GenerateProjectByValueRequest,
     Level,
     ProjectResponse,
 )
 from core.catalog.catalog_repository import CatalogRepository
-from core.ensable_project.ensable_project_repository import EnsableProjectRepository
-from core.ensable_project.ensable_project_service import ProjectGeneratorService
-from core.ensable_project.ensable_project_ai_gatway_service import (
+from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
+from core.ensemble_project.ensemble_project_service import ProjectGeneratorService
+from core.ensemble_project.ensemble_project_ai_gatway_service import (
     ProjectGeneratorAIGateway,
 )
 
-router = APIRouter(prefix="/ensable_project", tags=["ensable_project"])
+router = APIRouter(prefix="/ensemble_project", tags=["ensemble_project"])
 
 
 def get_project_service(db: Session = Depends(get_db)) -> ProjectGeneratorService:
     ai_gateway = ProjectGeneratorAIGateway()  # builds its own Strands agents internally
     catalog_repo = CatalogRepository(db)
-    project_repo = EnsableProjectRepository(db)
+    project_repo = EnsembleProjectRepository(db)
     return ProjectGeneratorService(ai_gateway, catalog_repo, project_repo)
 
 

@@ -1,6 +1,6 @@
-from core.ensable_project.api.ensable_project_models import Level
+from core.ensemble_project.api.ensemble_project_models import Level
 
-ENDPOINT = "/api/v1/ensable_project/generate_project_by_value"
+ENDPOINT = "/api/v1/ensemble_project/generate_project_by_value"
 
 VALID_PAYLOAD = {
     "programming_language": "Python",

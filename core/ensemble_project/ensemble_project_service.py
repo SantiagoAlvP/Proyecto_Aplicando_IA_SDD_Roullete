@@ -3,15 +3,15 @@ from random import randint
 
 
 from core.catalog.catalog_repository import CatalogRepository
-from core.ensable_project.api.ensable_project_models import (
+from core.ensemble_project.api.ensemble_project_models import (
     GenerateProjectByValueRequest,
     Level,
     ProjectResponse,
     Extras,
     NamedCatalogEntry,
 )
-from core.ensable_project.ensable_project_repository import EnsableProjectRepository
-from core.ensable_project.ensable_project_ai_gatway_service import (
+from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
+from core.ensemble_project.ensemble_project_ai_gatway_service import (
     ProjectGeneratorAIGateway,
 )
 from core.settings.default import AppSettings
@@ -22,7 +22,7 @@ class ProjectGeneratorService:
         self,
         ai_gateway: ProjectGeneratorAIGateway,
         catalog_repo: CatalogRepository,
-        project_repo: EnsableProjectRepository,
+        project_repo: EnsembleProjectRepository,
     ):
         self.ai_gateway = ai_gateway
         self.catalog_repo = catalog_repo

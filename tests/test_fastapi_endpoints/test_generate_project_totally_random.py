@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-ENDPOINT = "/api/v1/ensable_project/generate_project_totally_random"
+ENDPOINT = "/api/v1/ensemble_project/generate_project_totally_random"
 
 
 def test_generate_random_returns_201(client_with_mocks):
@@ -38,7 +38,7 @@ def test_generate_random_level_in_valid_range(client_with_mocks):
     client, ai_gw, _, _ = client_with_mocks
 
     with patch(
-        "core.ensable_project.ensable_project_service.AppSettings"
+        "core.ensemble_project.ensemble_project_service.AppSettings"
     ) as mock_settings:
         mock_settings.return_value.CANDIDATES = 3
 
@@ -106,9 +106,9 @@ def test_fixed_level_via_randint_mock(client_with_mocks):
     client, ai_gw, _, _ = client_with_mocks
 
     with (
-        patch("core.ensable_project.ensable_project_service.randint", return_value=2),
+        patch("core.ensemble_project.ensemble_project_service.randint", return_value=2),
         patch(
-            "core.ensable_project.ensable_project_service.AppSettings"
+            "core.ensemble_project.ensemble_project_service.AppSettings"
         ) as mock_settings,
     ):
         mock_settings.return_value.CANDIDATES = 2

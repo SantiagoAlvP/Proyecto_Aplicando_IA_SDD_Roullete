@@ -1,7 +1,7 @@
 import json
 from strands import Agent
 from strands.models.ollama import OllamaModel
-from core.ensable_project.api.ensable_project_models import (
+from core.ensemble_project.api.ensemble_project_models import (
     BestIndex,
     ValidationResult,
 )

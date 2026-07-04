@@ -1,8 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# project_jackpot - jero98772
+
 from fastapi import APIRouter, FastAPI
 
-from core.health.health import router as health_router
-from core.catalog.catalog_router import router as catalog_router
-from core.ensable_project.ensable_project_router import router as ensable_project_router
+from core.health.api.health import router as health_router
+from core.catalog.api.catalog_router import router as catalog_router
+from core.ensable_project.api.ensable_project_router import (
+    router as ensable_project_router,
+)
 
 
 def configure_routers(fast_api: FastAPI):

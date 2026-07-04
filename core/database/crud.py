@@ -118,13 +118,13 @@ class ProjectExtraCRUD:
     def create(
         session: Session,
         projects_id: int,
-        project_programming_language_id: int,
+        project_programming_language_id: Optional[int] = None,
         project_tech_id: Optional[int] = None,
         project_addon_id: Optional[int] = None,
     ) -> ProjectExtra:
         extra = ProjectExtra(
             projects_id=projects_id,
-            project_programming_language_id=project_programming_language_id,
+            project_programming_language_id=cast(int, project_programming_language_id),
             project_tech_id=cast(int, project_tech_id),
             project_addon_id=cast(int, project_addon_id),
         )

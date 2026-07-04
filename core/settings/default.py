@@ -10,7 +10,7 @@ class AppSettings(BaseSettings):
     )
 
     # FASTAPI SETTINGS
-    TITLE: str = "project_roulette"
+    TITLE: str = "project_jackpot"
     VERSION: str = "1.0.0"
 
     OPENAPI_URL: str = "/api/openapi.json"
@@ -23,12 +23,25 @@ class AppSettings(BaseSettings):
     DB_PASSWORD: str = "postgres"
     DB_HOST: str = "localhost"
     DB_PORT: str = "5433"
-    DB_NAME: str = "project_roulette_db"
+    DB_NAME: str = "project_jackpot_db"
 
     # PRINT LOGS
     ENABLE_LOGS: bool = True
 
     CORS_ALLOWED_ORIGINS: Sequence[str] = []
+
+    # GENERATE PROJECT SETTINGS
+    CANDIDATES: int = 2
+
+    # LLM CONSTANTS LMSTUDIO
+    BASE_URL_LMSTUDIO: str = "http://localhost:1234/v1"
+    API_KEY_LMSTUDIO: str = "lm-studio"
+    LMSTUDIO_MODEL: str = "gemma4:E2B"
+    TEMPERATURE: float = 0.7
+
+    # LLM CONSTANTS OLLAMA
+    OLLAMA_MODEL: str = "gemma4:E2B"
+    OLLAMA_HOST: str = "http://localhost:11434"
 
     @property
     def db_url(self) -> str:
@@ -37,6 +50,13 @@ class AppSettings(BaseSettings):
         return (
             f"postgresql://{self.DB_USER}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
+
+    @staticmethod
+    def message_base(prompt) -> list:
+        return [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ]
 
 
 def setup_logging(settings: AppSettings) -> None:

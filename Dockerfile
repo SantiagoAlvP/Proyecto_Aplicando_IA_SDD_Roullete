@@ -10,4 +10,4 @@ COPY . .
 
 RUN uv sync --frozen
 
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "project_jackpot.py"]

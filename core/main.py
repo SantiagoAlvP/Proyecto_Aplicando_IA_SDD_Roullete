@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# project_jackpot - jero98772
+
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from core.database.database import init_db

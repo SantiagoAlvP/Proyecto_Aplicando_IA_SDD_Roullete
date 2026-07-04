@@ -1,33 +1,11 @@
 import random
-from abc import ABC, abstractmethod
-
 from sqlmodel import Session
 
 from core.database.crud import AddonCRUD, ProgrammingLanguageCRUD, TechCRUD
 from core.database.models import ProjectAddon, ProjectProgrammingLanguage, ProjectTech
 
 
-class CatalogRepository(ABC):
-    @abstractmethod
-    def get_programming_languages(self) -> list[ProjectProgrammingLanguage]: ...
-
-    @abstractmethod
-    def get_technologies(self) -> list[ProjectTech]: ...
-
-    @abstractmethod
-    def get_addons(self) -> list[ProjectAddon]: ...
-
-    @abstractmethod
-    def get_random_programming_language(self) -> ProjectProgrammingLanguage | None: ...
-
-    @abstractmethod
-    def get_random_technology(self) -> ProjectTech | None: ...
-
-    @abstractmethod
-    def get_random_addon(self) -> ProjectAddon | None: ...
-
-
-class SQLModelCatalogRepository(CatalogRepository):
+class CatalogRepository:
     def __init__(self, session: Session):
         self.session = session
 

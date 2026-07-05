@@ -48,12 +48,12 @@ def test_generate_by_level_level_is_preserved(client_with_mocks):
 # ── AI interactions ──────────────────────────────────────────────────────────
 
 
-def test_choose_best_project_is_called(client_with_mocks):
+def test_choose_valid_project_is_called(client_with_mocks):
     client, ai_gw, _, _ = client_with_mocks
 
     client.post(ENDPOINT, json={"level": 3})
 
-    ai_gw.choose_best_project.assert_awaited_once()
+    ai_gw.choose_valid_project.assert_awaited_once()
 
 
 def test_candidates_count_matches_settings(client_with_mocks):
@@ -65,7 +65,7 @@ def test_candidates_count_matches_settings(client_with_mocks):
         mock_settings.return_value.CANDIDATES = 4
         client.post(ENDPOINT, json={"level": 2})
 
-    candidates_arg = ai_gw.choose_best_project.call_args[0][0]
+    candidates_arg = ai_gw.choose_valid_project.call_args[0][0]
     assert len(candidates_arg) == 4
 
 
@@ -78,7 +78,7 @@ def test_candidates_all_have_correct_level(client_with_mocks):
         mock_settings.return_value.CANDIDATES = 3
         client.post(ENDPOINT, json={"level": 4})
 
-    candidates = ai_gw.choose_best_project.call_args[0][0]
+    candidates = ai_gw.choose_valid_project.call_args[0][0]
     assert all(c["level"] == 4 for c in candidates)
 
 

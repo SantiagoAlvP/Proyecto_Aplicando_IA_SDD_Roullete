@@ -1,10 +1,7 @@
 import json
 from strands import Agent
 from strands.models.ollama import OllamaModel
-from core.ensemble_project.api.ensemble_project_models import (
-    BestIndex,
-    ValidationResult,
-)
+from core.ensemble_project.api.ensemble_project_models import ProjectSelection
 
 from core.settings.default import AppSettings
 
@@ -18,23 +15,23 @@ class ProjectGeneratorAIGateway:
             model_id=settings.OLLAMA_MODEL,
         )
 
-        self._validator_agent = Agent(
+        self._selector_agent = Agent(
             model=model,
             system_prompt=(
-                "You are a senior software architect. "
-                "Evaluate whether a given tech stack is coherent and appropriate "
-                "for the stated skill level. "
-                "Respond ONLY via the validation tool – never add extra prose."
-            ),
-        )
-
-        self._chooser_agent = Agent(
-            model=model,
-            system_prompt=(
-                "You are a senior software architect. "
-                "Choose the most coherent, practical, and learnable project "
-                "from the provided candidates. "
-                "Respond ONLY via the best-index tool – never add extra prose."
+                "You are a senior software architect evaluating candidate tech stacks "
+                "for build FEASIBILITY, not conventionality. "
+                "A stack is VALID as long as it is technically possible to build the "
+                "stated kind of project with those tools — even if the combination is "
+                "unusual, hard, low-level, or non-idiomatic for that language. "
+                "Novelty, difficulty, or an unconventional pairing is NOT a reason to "
+                "reject a stack. Only reject a stack if there is a genuine technical "
+                "impossibility or a total mismatch between the tools and the goal "
+                "(e.g. the language/runtime fundamentally cannot do the required job, "
+                "or the 'stack' isn't a stack at all — just an unrelated tool with no "
+                "way to build the actual project). "
+                "Among the valid candidates, pick the single best one for its stated "
+                "skill level. "
+                "Respond ONLY via the project-selection tool – never add extra prose."
             ),
         )
 
@@ -47,49 +44,40 @@ class ProjectGeneratorAIGateway:
             ),
         )
 
-    async def validate_project(self, project: dict) -> tuple[bool, str]:
-        prompt = (
-            f"Evaluate this tech stack:\n"
-            f"- Language  : {project.get('programming_language')}\n"
-            f"- Technology: {project.get('technologies')}\n"
-            f"- Addon     : {project.get('addons')}\n"
-            f"- Level     : {project.get('level')} (1=Beginner, 5=Expert)\n"
-            f"- Extras    : {project.get('extras', [])}\n\n"
-            "VALID examples: Python+FastAPI+PostgreSQL (any level), "
-            "Java+Spring Boot+Kafka (intermediate/advanced), Rust+Axum+PostgreSQL (advanced).\n"
-            "INVALID examples: Prolog+CI/CD only (no real stack), "
-            "COBOL+React Native (anachronistic), Level 1+Kubernetes+Kafka+CQRS (too complex)."
-        )
-        try:
-            result = self._validator_agent(
-                prompt,
-                structured_output_model=ValidationResult,
-            )
-            data = result.structured_output
-            if not isinstance(data, ValidationResult):
-                return False, "Validation error: no structured output returned"
-            return data.valid, data.reason
-        except Exception as exc:
-            return False, f"Validation error: {exc}"
-
-    async def choose_best_project(self, projects: list[dict]) -> dict:
+    async def choose_valid_project(self, projects: list[dict]) -> ProjectSelection:
         listed = "\n".join(f"{i + 1}. {json.dumps(p)}" for i, p in enumerate(projects))
         prompt = (
-            f"Choose the most coherent, practical, and learnable project "
-            f"from the candidates below.\n\nCandidates:\n{listed}"
+            "Evaluate the candidate tech stacks below. Each entry includes "
+            "programming_language, technologies, addons, level (1=Beginner..5=Expert) "
+            "and extras.\n\n"
+            "Judge VALIDITY purely on feasibility: can this project actually be built "
+            "with these tools, in principle? Unusual, advanced, or creative combos "
+            "are still VALID as long as they're possible.\n\n"
+            "VALID examples (unusual but buildable):\n"
+            "- URL shortener in Prolog (just needs logic + persistence, doable)\n"
+            "- Bootloader in Rust (real, common systems-programming use case)\n"
+            "- Blockchain toy implementation in Haskell (pure logic, no blocker)\n"
+            "- Python+PostgreSQL web app (any level)\n"
+            "- Java+Spring Boot service (intermediate/advanced)\n"
+            "- Rust+Axum+PostgreSQL API (advanced)\n\n"
+            "INVALID examples (genuinely not buildable / not a real stack):\n"
+            "- Operating system in pure Python (no runtime-free execution; Python "
+            "needs an interpreter/OS underneath it, can't be the OS itself)\n"
+            "- Full online shop in COBOL (no viable HTTP/web/e-commerce tooling exists)\n"
+            "- Prolog + CI/CD only (CI/CD isn't a project target, there's nothing to build)\n"
+            "- COBOL + React Native (no interop path between them for one project)\n\n"
+            f"Candidates:\n{listed}\n\n"
+            "Pick the best_index (1-based) among the FEASIBLE candidates. "
+            "If none are feasible, set valid to false and explain why in reason "
+            "(reason is required whenever valid is false)."
         )
-        try:
-            result = self._chooser_agent(
-                prompt,
-                structured_output_model=BestIndex,
+        result = self._selector_agent(prompt, structured_output_model=ProjectSelection)
+        output = result.structured_output
+        if not isinstance(output, ProjectSelection):
+            raise ValueError(
+                "Selector agent did not return a valid ProjectSelection structured output"
             )
-            data = result.structured_output
-            if not isinstance(data, BestIndex):
-                return projects[0]
-            idx = data.best_index - 1  # convert to 0-based
-            return projects[max(0, min(idx, len(projects) - 1))]
-        except Exception:
-            return projects[0]
+        return output
 
     async def generate_description(self, project: dict) -> str:
         prompt = (
@@ -103,8 +91,5 @@ class ProjectGeneratorAIGateway:
             "Explain WHAT they will build and WHAT they will learn. "
             "Plain text only – no lists, no markdown."
         )
-        try:
-            result = self._describer_agent(prompt)
-            return str(result).strip()
-        except Exception as exc:
-            return f"Description unavailable: {exc}"
+        result = self._describer_agent(prompt)
+        return str(result).strip()

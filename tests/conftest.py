@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 from core.catalog.catalog_repository import CatalogRepository
 from core.catalog.api.catalog_router import get_catalog_service, router
 from core.catalog.catalog_service import CatalogService, DefaultCatalogService
+from core.ensemble_project.api.ensemble_project_models import ProjectSelection
 
 SAVED_PROJECT = {
     "programming_language": "Python",
@@ -105,7 +106,7 @@ def service(mock_repo):
 
 def make_catalog_repo() -> MagicMock:
     repo = MagicMock()
-    repo.get_random_programming_language.return_value = MagicMock(name_attr="Python")
+    repo.get_random_programming_language.return_value = MagicMock()
     repo.get_random_programming_language.return_value.name = "Python"
     repo.get_random_technology.return_value = MagicMock()
     repo.get_random_technology.return_value.name = "FastAPI"
@@ -121,19 +122,24 @@ def make_project_repo(saved: dict | None = None) -> MagicMock:
 
 
 # ── AI gateway stub ──────────────────────────────────────────────────────────
+# IMPORTANT: this must mirror the *actual* ProjectGeneratorAIGateway interface:
+#   - choose_valid_project(projects: list[dict]) -> ProjectSelection
+#   - generate_description(project: dict) -> str
+# There is no validate_project / choose_best_project in production code —
+# mocking those names silently created un-awaitable MagicMocks and broke
+# every test with "object MagicMock can't be used in 'await' expression".
 
 
 def make_ai_gateway(
     *,
     valid: bool = True,
-    reason: str = "",
-    best_index: int = 0,
+    reason: str | None = None,
+    best_index: int = 1,  # 1-based, matches ProjectSelection.best_index semantics
     description: str = MOCK_DESCRIPTION,
 ) -> MagicMock:
     gw = MagicMock()
-    gw.validate_project = AsyncMock(return_value=(valid, reason))
-    gw.choose_best_project = AsyncMock(
-        side_effect=lambda projects: projects[best_index]
+    gw.choose_valid_project = AsyncMock(
+        return_value=ProjectSelection(best_index=best_index, valid=valid, reason=reason)
     )
     gw.generate_description = AsyncMock(return_value=description)
     return gw

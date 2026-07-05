@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlmodel import Session
 from core.database.database import get_db
 from core.ensemble_project.api.ensemble_project_models import (
@@ -25,7 +25,6 @@ def get_project_service(db: Session = Depends(get_db)) -> ProjectGeneratorServic
 
 @router.post(
     "/generate_project_by_value",
-    response_model=ProjectResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def generate_project_by_value(
@@ -35,9 +34,7 @@ async def generate_project_by_value(
     try:
         return await service.generate_by_value(payload)
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
-        )
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @router.post(

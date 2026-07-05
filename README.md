@@ -23,10 +23,10 @@ Whether you're following **Build Your Own X**, completing **CodeCrafters** chall
 Example ideas include:
 
 * Build a distributed cache in Rust
-* Create a recommendation engine in Dart
+* Create a Url-shorten engine in Prolog
 * Develop REST/SOAP APIs in Ruby
 * Implement graph algorithms in Go
-* Design an event-driven microservice architecture
+* Design Boot Loader in Rust
 
 Each generated project includes a detailed description explaining what you will build and the concepts you will practice.
 
@@ -139,25 +139,28 @@ http://127.0.0.1:9600/api/redocs
 
 ```json
 {
-  "programming_language": "Ruby",
+  "programming_language": "Python",
   "technologies": "REST/SOAP APIs",
-  "addons": "Double Checked Locking",
+  "addons": "pytest",
   "extras": [
     {
-      "programming_language": "Dart",
+      "programming_language": "Clojure",
       "technologies": "Recommendation Engine",
-      "addons": "Memento"
+      "addons": "Docker"
     },
     {
-      "programming_language": "Apex",
-      "technologies": "Knowledge Graph",
-      "addons": "Longest Increasing Subsequence"
+      "programming_language": "None",
+      "technologies": "GenAI and LLM",
+      "addons": "Best Practices"
     }
   ],
   "level": 3,
-  "description": "You will build robust Ruby APIs handling complex data interactions using REST and SOAP. This project introduces concurrent programming through the Double Checked Locking pattern while strengthening your understanding of systems design and synchronization."
+  "description": "Build a Python application that integrates with REST/SOAP APIs, is fully tested with pytest, and incorporates a Clojure-powered recommendation engine for create projects running in Docker. Enhance the system with GenAI and LLM capabilities, following modern software engineering best practices to create a scalable, maintainable, and production-ready solution."
 }
 ```
+<p align="center">
+  <img src="https://github.com/jero98772/project_roulette/blob/dev/docs/pictures/meme.png?raw=true" alt="meme" width="500">
+</p>
 
 ---
 

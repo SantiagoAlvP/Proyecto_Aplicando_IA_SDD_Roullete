@@ -51,3 +51,9 @@ class Entity(BaseModel):
 class NamedCatalogEntry(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str
+
+
+class ProjectSelection(BaseModel):
+    best_index: int
+    valid: bool
+    reason: str | None = None

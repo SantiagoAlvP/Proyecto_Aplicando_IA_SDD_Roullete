@@ -24,7 +24,8 @@ class EnsembleProjectRepository:
         )
         tech_id = get_or_create_id(self.session, TechCRUD, project["technologies"])
         addon_id = get_or_create_id(self.session, AddonCRUD, project["addons"])
-
+        if lang_id is None:
+            raise ValueError("Failed to get or create programming_language id")
         saved = ProjectCRUD.create(
             session=self.session,
             programming_language_id=lang_id,

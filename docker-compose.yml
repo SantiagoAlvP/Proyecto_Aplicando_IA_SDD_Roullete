@@ -1,0 +1,47 @@
+services:
+  api:
+    build: .
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - ollama
+    environment:
+      DATABASE_URL: postgresql+psycopg://app_user:secret_password@postgres:5432/app_db
+      OLLAMA_URL: http://ollama:11434
+
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    entrypoint: >
+      sh -c "
+      sleep 10 &&
+      ollama pull gemma4:e2b
+      "
+    volumes:
+      - ollama_data:/root/.ollama
+volumes:
+  postgres_data:
+  ollama_data:
+

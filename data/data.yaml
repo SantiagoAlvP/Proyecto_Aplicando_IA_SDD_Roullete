@@ -1,0 +1,522 @@
+programming_languages:
+  - Python
+  - Rust
+  - C
+  - C++
+  - C#
+  - Java
+  - Kotlin
+  - Scala
+  - Groovy
+  - JavaScript
+  - TypeScript
+  - Go
+  - Dart
+  - Swift
+  - Objective-C
+  - PHP
+  - Ruby
+  - Perl
+  - Lua
+  - R
+  - Julia
+  - MATLAB
+  - Fortran
+  - COBOL
+  - Ada
+  - Pascal
+  - Delphi
+  - Visual Basic
+  - F#
+  - OCaml
+  - Haskell
+  - Elixir
+  - Erlang
+  - Clojure
+  - Common Lisp
+  - Scheme
+  - Prolog
+  - Nim
+  - Zig
+  - Crystal
+  - V
+  - D
+  - Assembly
+  - Bash
+  - PowerShell
+  - Tcl
+  - Smalltalk
+  - Solidity
+  - Move
+  - Apex
+  - ABAP
+  - SAS
+  - Scratch
+
+techs:
+  - Operating System
+  - Programming Language
+  - Compiler
+  - Interpreter
+  - Virtual Machine
+  - Emulator
+  - Database
+  - Cache
+  - Search Engine
+  - Web Server
+  - API Gateway
+  - Reverse Proxy
+  - Load Balancer
+  - DNS Server
+  - VPN
+  - Network Stack
+  - Message Broker
+  - Distributed System
+  - Blockchain
+  - Cryptocurrency
+  - Neural Network
+  - Large Language Model
+  - RAG System
+  - AI Agent
+  - Chatbot
+  - Recommendation Engine
+  - Vector Database
+  - Text Editor
+  - IDE
+  - Shell
+  - Terminal Emulator
+  - Git Client
+  - Docker Clone
+  - Container Runtime
+  - Kubernetes Operator
+  - Build System
+  - Package Manager
+  - Template Engine
+  - Regex Engine
+  - Memory Allocator
+  - Garbage Collector
+  - File System
+  - Authentication Server
+  - CDN
+  - Web Browser
+  - Rendering Engine
+  - Physics Engine
+  - Game Engine
+  - Voxel Engine
+  - 3D Renderer
+  - Computer Vision System
+  - OCR Engine
+  - Monitoring System
+  - Observability Platform
+  - Event Streaming Platform
+  - Social Network
+  - Torrent Client
+  - Video Player
+  - Music Streaming Service
+  - Search Crawler
+  - URL Shortener
+  - CI/CD Platform
+  - Cloud Storage Service
+  - Object Store
+  - Data Warehouse
+  - Knowledge Graph
+  - Workflow Engine
+  - Rule Engine
+
+addons:
+  - Authentication
+  - Authorization
+  - REST API
+  - GraphQL API
+  - gRPC Support
+  - WebSocket Support
+  - Server-Sent Events (SSE)
+
+  - Unit Testing
+  - Integration Testing
+  - End-to-End Testing
+  - Performance Testing
+  - Load Testing
+  - Test Coverage Reports
+
+  - CI/CD
+  - Automated Deployment
+  - Git Hooks
+  - Code Quality Checks
+  - Static Code Analysis
+
+  - Logging
+  - Structured Logging
+  - Audit Logging
+  - Error Tracking
+  - Monitoring
+  - Distributed Tracing
+  - Metrics Collection
+  - Alerting
+
+  - Caching
+  - In-Memory Cache
+  - Distributed Cache
+  - Session Management
+
+  - Rate Limiting
+  - API Key Management
+  - OAuth2
+  - JWT Support
+  - Single Sign-On (SSO)
+  - Multi-Factor Authentication (MFA)
+
+  - Internationalization (i18n)
+  - Localization (l10n)
+  - Multi-Language Support
+  - Timezone Support
+
+  - Database Migrations
+  - Database Seeding
+  - Connection Pooling
+  - ORM Integration
+
+  - File Uploads
+  - Image Processing
+  - PDF Generation
+  - Email Notifications
+  - SMS Notifications
+  - Push Notifications
+
+  - Background Jobs
+  - Task Scheduling
+  - Message Queues
+  - Event-Driven Architecture
+
+  - Search Engine Integration
+  - Full-Text Search
+  - Recommendation Engine
+
+  - API Documentation
+  - OpenAPI/Swagger
+  - SDK Generation
+
+  - Feature Flags
+  - Configuration Management
+  - Secrets Management
+
+  - Health Checks
+  - Service Discovery
+  - Container Support
+  - Kubernetes Integration
+
+  - Plugin System
+  - Theme System
+  - Multi-Tenancy
+
+  - Data Import/Export
+  - CSV Support
+  - Backup and Restore
+
+  - Analytics Dashboard
+  - Usage Statistics
+  - User Activity Tracking
+
+  - AI Chatbot Integration
+  - Vector Database Support
+  - Retrieval-Augmented Generation (RAG)
+  - Speech-to-Text
+  - Text-to-Speech
+
+  - Geolocation
+  - Mapping Support
+  - Payment Processing
+  - Shopping Cart
+  - Subscription Management
+
+
+  - Bubble Sort
+  - Selection Sort
+  - Insertion Sort
+  - Merge Sort
+  - Quick Sort
+  - Heap Sort
+  - Shell Sort
+  - Counting Sort
+  - Radix Sort
+  - Bucket Sort
+  - Linear Search
+  - Binary Search
+  - Jump Search
+  - Interpolation Search
+  - Exponential Search
+  - Fibonacci Search
+
+  - Depth First Search (DFS)
+  - Breadth First Search (BFS)
+
+  - Dijkstra
+  - Bellman-Ford
+  - Floyd-Warshall
+  - A*
+
+  - Prim
+  - Kruskal
+  - Boruvka
+
+  - Kosaraju
+  - Tarjan SCC
+  - Union Find
+
+  - Kahn Topological Sort
+  - DFS Topological Sort
+
+  - Knuth-Morris-Pratt (KMP)
+  - Boyer-Moore
+  - Rabin-Karp
+  - Aho-Corasick
+  - Z Algorithm
+  - Suffix Array
+  - Suffix Tree
+  - Trie
+
+  - Longest Common Subsequence
+  - Longest Increasing Subsequence
+  - Knapsack
+  - Matrix Chain Multiplication
+  - Edit Distance
+  - Coin Change
+  - Rod Cutting
+
+  - Huffman Coding
+  - Activity Selection
+  - Fractional Knapsack
+  - Job Scheduling
+
+  - N Queens
+  - Sudoku Solver
+  - Hamiltonian Cycle
+  - Graph Coloring
+
+  - Merge Sort
+  - Quick Sort
+  - Binary Search
+  - Closest Pair of Points
+
+  - Graham Scan
+  - Jarvis March
+  - Line Sweep
+  - Convex Hull
+
+  - Huffman Coding
+  - LZW
+  - Run Length Encoding (RLE)
+
+  - RSA
+  - Diffie-Hellman
+  - AES
+  - SHA-256
+
+  - Linear Regression
+  - Logistic Regression
+  - Decision Tree
+  - Random Forest
+  - K-Means
+  - K-Nearest Neighbors (KNN)
+  - Support Vector Machine (SVM)
+  - Neural Network
+
+  - Newton-Raphson
+  - Bisection Method
+  - Gaussian Elimination
+  - Fast Fourier Transform (FFT)
+
+  - Binary Search Tree
+  - AVL Tree
+  - Red Black Tree
+  - B Tree
+  - B+ Tree
+  - KD Tree
+  - Segment Tree
+  - Fenwick Tree
+
+  - Hash Table
+  - Consistent Hashing
+  - Binary Heap
+  - Fibonacci Heap
+  - 2-SAT
+  - DPLL
+  - CDCL
+  - Bloom Filter
+  - HyperLogLog
+  - Reservoir Sampling
+
+  - Singleton
+  - Factory Method
+  - Abstract Factory
+  - Builder
+  - Prototype
+  - Object Pool
+
+  - Adapter
+  - Bridge
+  - Composite
+  - Decorator
+  - Facade
+  - Flyweight
+  - Proxy
+
+  - Chain of Responsibility
+  - Command
+  - Interpreter
+  - Iterator
+  - Mediator
+  - Memento
+  - Observer
+  - State
+  - Strategy
+  - Template Method
+  - Visitor
+  - Null Object
+  - Specification
+  - Servant
+
+  - Active Object
+  - Balking
+  - Double Checked Locking
+  - Event Queue
+  - Future
+  - Guarded Suspension
+  - Monitor Object
+  - Producer Consumer
+  - Read Write Lock
+  - Reactor
+  - Thread Pool
+  - Thread Specific Storage
+
+  - Model View Controller (MVC)
+  - Model View Presenter (MVP)
+  - Model View ViewModel (MVVM)
+  - Layered Architecture
+  - Hexagonal Architecture
+  - Clean Architecture
+  - Onion Architecture
+  - Microservices
+  - Event Driven Architecture
+  - Service Oriented Architecture (SOA)
+  - Client Server
+  - Peer to Peer
+  - CQRS
+  - Event Sourcing
+  - Pipes and Filters
+  - Blackboard
+
+  - Front Controller
+  - Intercepting Filter
+  - View Helper
+  - Composite View
+  - Page Controller
+
+  - Business Delegate
+  - Service Locator
+  - Session Facade
+  - Transfer Object
+  - Value Object
+
+  - Data Access Object (DAO)
+  - Repository
+  - Unit of Work
+  - Identity Map
+  - Lazy Load
+  - Data Mapper
+  - Active Record
+
+  - Circuit Breaker
+  - Retry
+  - Bulkhead
+  - Saga
+  - API Gateway
+  - Sidecar
+  - Ambassador
+  - Strangler Fig
+  - Service Discovery
+  - Leader Election
+
+  - Backend for Frontend (BFF)
+  - Database per Service
+  - Shared Nothing
+  - Event Streaming
+  - Outbox Pattern
+  - Inbox Pattern
+  - Transactional Outbox
+
+  - Publish Subscribe
+  - Message Broker
+  - Request Reply
+  - Competing Consumers
+  - Message Routing
+
+  - Entity
+  - Value Object
+  - Aggregate
+  - Aggregate Root
+  - Repository
+  - Domain Service
+  - Factory
+  - Specification
+  - Domain Event
+
+  - Anti Corruption Layer
+  - Adapter
+  - Gateway
+  - Canonical Data Model
+  - Message Translator
+
+  - Proxy
+  - OAuth Flow
+  - Token Based Authentication
+  - API Key Pattern
+  - Role Based Access Control (RBAC)
+  - Claims Based Authorization
+
+  - Presentation Model
+  - MVC
+  - MVP
+  - MVVM
+  - Flux
+  - Redux
+
+  - Component
+  - Entity Component System (ECS)
+  - Game Loop
+  - Dirty Flag
+  - Object Pool
+  - Update Method
+
+  - Higher Order Function
+  - Pipeline
+  - Currying
+  - Memoization
+  - Monoid
+  - Functor
+  - Monad
+
+  - Observer
+  - Reactive Streams
+  - Event Sourcing
+  - CQRS
+  - Publish Subscribe
+
+  - Visitor
+  - Interpreter
+  - Abstract Syntax Tree (AST)
+  - Symbol Table
+  - Intermediate Representation (IR)
+
+  - Reactor
+  - Proactor
+  - Scheduler
+  - Producer Consumer
+  - Monitor Object
+
+  - Pipeline
+  - Ensemble
+  - Blackboard
+  - Agent
+  - Chain of Thought
+  - Retrieval Augmented Generation (RAG)

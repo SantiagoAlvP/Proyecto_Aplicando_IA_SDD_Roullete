@@ -15,17 +15,14 @@ from core.ensemble_project.ensemble_project_ai_gatway_service import (
     ProjectGeneratorAIGateway,
 )
 from core.settings.default import AppSettings
-from core.ensemble_project.api.ensemble_project_validation import (
-    fill_or_random,
-)
 
-fill_or_random
+from core.settings.clojure_settings import ClojureProjectGeneratorAIGateway
 
 
 class ProjectGeneratorService:
     def __init__(
         self,
-        ai_gateway: ProjectGeneratorAIGateway,
+        ai_gateway: ClojureProjectGeneratorAIGateway | ProjectGeneratorAIGateway,
         catalog_repo: CatalogRepository,
         project_repo: EnsembleProjectRepository,
     ):

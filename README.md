@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-# project_roulette
-=======
-# 🎰 Project Jackpot
+# Project Jackpot 🎰
 
 You dont what to code/VibeCode , NO problem
 
@@ -220,4 +217,3 @@ uv run ty check
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
 
 See the [LICENSE](LICENSE) file for details.
->>>>>>> dev

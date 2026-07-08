@@ -9,15 +9,14 @@ from core.ensemble_project.api.ensemble_project_models import (
 from core.catalog.catalog_repository import CatalogRepository
 from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
 from core.ensemble_project.ensemble_project_service import ProjectGeneratorService
-from core.ensemble_project.ensemble_project_ai_gatway_service import (
-    ProjectGeneratorAIGateway,
-)
+from core.settings.clojure_settings import ClojureProjectGeneratorAIGateway
 
 router = APIRouter(prefix="/ensemble_project", tags=["ensemble_project"])
 
 
 def get_project_service(db: Session = Depends(get_db)) -> ProjectGeneratorService:
-    ai_gateway = ProjectGeneratorAIGateway()  # builds its own Strands agents internally
+    # ai_gateway = ProjectGeneratorAIGateway()
+    ai_gateway = ClojureProjectGeneratorAIGateway()
     catalog_repo = CatalogRepository(db)
     project_repo = EnsembleProjectRepository(db)
     return ProjectGeneratorService(ai_gateway, catalog_repo, project_repo)

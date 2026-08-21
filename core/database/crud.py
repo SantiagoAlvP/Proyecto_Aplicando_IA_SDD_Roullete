@@ -1,5 +1,5 @@
 from typing import Optional, Sequence, cast
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from core.database.models import (
     Project,
@@ -111,6 +111,17 @@ class ProjectCRUD:
     @staticmethod
     def get_all(session: Session) -> Sequence[Project]:
         return session.exec(select(Project)).all()
+
+    @staticmethod
+    def get_recent(session: Session, limit: int) -> Sequence[Project]:
+        """Most recent projects first.
+
+        The limit is always applied in SQL, never in Python: an unbounded
+        SELECT is a denial-of-service waiting to happen (spec 003, HU-09).
+        """
+        return session.exec(
+            select(Project).order_by(col(Project.id).desc()).limit(limit)
+        ).all()
 
 
 class ProjectExtraCRUD:

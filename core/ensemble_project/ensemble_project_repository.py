@@ -11,7 +11,7 @@ from core.ensemble_project.api.ensemble_project_validation import (
     get_or_create_id,
     optional_id,
 )
-from core.ensemble_project.api.ensemble_project_models import Entity
+from core.ensemble_project.api.ensemble_project_models import Entity, HistoryEntry
 
 
 class EnsembleProjectRepository:
@@ -56,3 +56,29 @@ class EnsembleProjectRepository:
             )
 
         return project
+
+    def list_recent(self, limit: int) -> list[HistoryEntry]:
+        """Return the latest projects as DTOs, never as ORM entities.
+
+        Keeping SQLModel objects inside this layer is what allows the service
+        and the router to be tested without a database.
+        """
+        projects = ProjectCRUD.get_recent(self.session, limit)
+        entries: list[HistoryEntry] = []
+        for project in projects:
+            entries.append(
+                HistoryEntry(
+                    id=project.id or 0,
+                    programming_language=_name_of(project.programming_language),
+                    technologies=_name_of(project.tech),
+                    addons=_name_of(project.addon),
+                    description=project.description or "",
+                )
+            )
+        return entries
+
+
+def _name_of(entity: object) -> str:
+    """A catalog row may be missing on legacy data; never return None."""
+    name = getattr(entity, "name", None)
+    return str(name) if name else "Unknown"

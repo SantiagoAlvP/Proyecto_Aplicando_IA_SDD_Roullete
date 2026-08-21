@@ -1,0 +1,438 @@
+/* Project Jackpot - hand-written CSS, no UI library.
+   Three reels and a slider do not justify shipping a component framework
+   (Constitution, Principle VII). */
+
+:root {
+  --bg: #0b0e1a;
+  --bg-panel: #141a2e;
+  --bg-inset: #0a0d18;
+  --border: #26304d;
+  --text: #e8ecf7;
+  --text-muted: #9aa5c4;
+  --accent: #ffc93c;
+  --accent-deep: #ff8c42;
+  --danger: #ff6b6b;
+  --radius: 14px;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at 15% 0%, #1d2545 0%, transparent 55%),
+    radial-gradient(circle at 85% 10%, #2a1c3d 0%, transparent 50%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  line-height: 1.55;
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+}
+
+.page__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.page__title {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.page__title-accent {
+  background: linear-gradient(120deg, var(--accent), var(--accent-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.page__subtitle {
+  color: var(--text-muted);
+  margin: 0.4rem 0 0;
+}
+
+.page__main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.page__machine {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+/* ── machine ─────────────────────────────────────────────────────────────── */
+
+.machine {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.machine__reels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.reel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.reel__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.reel__window {
+  background: var(--bg-inset);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.reel--locked .reel__window {
+  border-color: var(--accent);
+}
+
+.reel__value {
+  font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+  font-weight: 600;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* The spin is pure CSS: zero extra JavaScript bytes (plan 002, D-04). */
+.reel__window--spinning .reel__value {
+  animation: reel-spin 0.18s linear infinite;
+  opacity: 0.75;
+}
+
+@keyframes reel-spin {
+  0% {
+    transform: translateY(-90%);
+  }
+  100% {
+    transform: translateY(90%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reel__window--spinning .reel__value {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+.reel__select,
+.reel__lock {
+  font: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-inset);
+  color: var(--text);
+  padding: 0.45rem 0.5rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.reel__lock--on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1200;
+  font-weight: 700;
+}
+
+.reel__select:disabled,
+.reel__lock:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.machine__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.level {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1 1 220px;
+}
+
+.level__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.level input {
+  flex: 1;
+  min-width: 90px;
+  accent-color: var(--accent);
+}
+
+.level__value {
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 1ch;
+}
+
+.spin {
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  color: #1a1200;
+  background: linear-gradient(120deg, var(--accent), var(--accent-deep));
+  flex: 0 0 auto;
+}
+
+.spin:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── result ──────────────────────────────────────────────────────────────── */
+
+.result {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+}
+
+.result__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.result__title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.result__level {
+  background: var(--bg-inset);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.result__description {
+  color: var(--text-muted);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.result__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0 0;
+}
+
+.result__facts dt {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.result__facts dd {
+  margin: 0.2rem 0 0;
+  font-weight: 600;
+}
+
+.result__extras h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 1.1rem 0 0.4rem;
+}
+
+.result__extras ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.placeholder {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  margin: 0;
+}
+
+/* ── error ───────────────────────────────────────────────────────────────── */
+
+.alert {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  color: var(--danger);
+}
+
+.alert button {
+  font: inherit;
+  font-weight: 700;
+  border: 1px solid var(--danger);
+  background: transparent;
+  color: var(--danger);
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+}
+
+/* ── history ─────────────────────────────────────────────────────────────── */
+
+.history {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+}
+
+.history__title {
+  margin: 0 0 0.8rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.history__empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.history__item {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+}
+
+.history__combo {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.history__addon {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── footer ──────────────────────────────────────────────────────────────── */
+
+.page__footer {
+  margin-top: 2.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.page__footer a {
+  color: var(--accent);
+}
+
+/* ── responsive: usable down to 360px (spec 002, FR-007) ─────────────────── */
+
+@media (max-width: 900px) {
+  .page__main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 1.5rem 0.85rem 2.5rem;
+  }
+
+  .machine {
+    padding: 1rem;
+  }
+
+  .machine__reels {
+    gap: 0.5rem;
+  }
+
+  .reel__window {
+    height: 70px;
+  }
+
+  .spin {
+    width: 100%;
+  }
+}

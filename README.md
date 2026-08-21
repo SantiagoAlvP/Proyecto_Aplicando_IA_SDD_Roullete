@@ -7,213 +7,202 @@ You dont what to code/VibeCode , NO problem
 </p>
 
 <p align="center">
-Generate unique software project ideas to challenge yourself, learn new technologies, and build an impressive portfolio.
+Genera ideas de proyectos de software para retarte, aprender tecnologías nuevas y construir un portafolio.
+</p>
+
+<p align="center">
+<b>Construido de principio a fin con Spec-Driven Development (GitHub Spec Kit).</b>
 </p>
 
 ---
 
-## 🚀 Overview
+## 🚀 Qué es
 
-**Project Jackpot** is an AI-powered project idea generator built with **FastAPI** and **Ollama**.
+**Project Jackpot** es una máquina tragamonedas de ideas de proyectos: combina un
+lenguaje de programación, una tecnología, un addon y un nivel de dificultad, valida
+con IA que la combinación sea *construible*, y redacta una descripción que explica
+qué vas a construir y qué vas a aprender.
 
-It creates software engineering project ideas by combining programming languages, technologies, algorithms, design patterns, and difficulty levels into complete project descriptions.
+Ejemplos reales generados por la aplicación:
 
-Whether you're following **Build Your Own X**, completing **CodeCrafters** challenges, or simply looking for your next side project, Project Jackpot provides endless inspiration tailored for learning.
-
-Example ideas include:
-
-* Build a distributed cache in Rust
-* Create a Url-shorten engine in Prolog
-* Develop REST/SOAP APIs in Ruby
-* Implement graph algorithms in Go
-* Design Boot Loader in Rust
-
-Each generated project includes a detailed description explaining what you will build and the concepts you will practice.
+* Un caché distribuido en Rust
+* Un acortador de URLs en Prolog
+* Un servidor DNS en C
+* Un motor de recomendación en Clojure
 
 ---
 
-# ✨ Features
+## 📐 Este repositorio es un ejercicio de SDD
 
-* 🎲 Generate completely random software project ideas
-* 🎯 Generate projects by difficulty level
-* 🛠 Generate projects using selected technologies
-* 🤖 AI-generated project descriptions
-* 📚 Browse available programming languages, technologies, and addons
-* ⚡ REST API built with FastAPI
-* 🐘 PostgreSQL database
-* 🐳 Docker support
-* 📖 Interactive API documentation
-* 🧪 Comprehensive automated tests
+El código no se escribió a base de prompts sueltos. Cada funcionalidad nació de una
+especificación versionada:
 
----
-
-# 🏗 Tech Stack
-
-* FastAPI
-* PostgreSQL
-* SQLModel
-* SQLAlchemy
-* Pydantic
-* Alembic
-* Ollama
-* Strands
-* Docker
-* uv
-
----
-
-# 🚀 Quick Start
-
-## Requirements
-
-* Docker
-* Docker Compose
-
-Clone the repository:
-
-```bash
-git clone https://github.com/jero98772/project_jackpot.git
-cd project_jackpot
+```
+.specify/memory/constitution.md      ← 7 principios no negociables
+specs/001-generador-de-proyectos/    ← spec.md · plan.md · tasks.md
+specs/002-interfaz-tragamonedas/
+specs/003-endurecimiento-seguridad/
+specs/004-despliegue-continuo/
 ```
 
-Start the API and PostgreSQL:
+| Documento | Qué contiene |
+|---|---|
+| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | Los principios que gobiernan todo el proyecto |
+| [`AGENTS.md`](AGENTS.md) | Guía obligatoria para cualquier agente de IA que toque el repositorio |
+| [`docs/backlog.md`](docs/backlog.md) | Las 10 Historias de Usuario con criterios Given/When/Then |
+| [`docs/security.md`](docs/security.md) | Modelo de amenaza, controles, OWASP y limitaciones conocidas |
+| [`docs/business-case.md`](docs/business-case.md) | ROI y comparativa OPEX/CAPEX: SDD vs. tradicional vs. prompting |
+| [`docs/deployment.md`](docs/deployment.md) | Despliegue en Railway paso a paso, costo USD 0.00 |
+| [`docs/live-demo-runbook.md`](docs/live-demo-runbook.md) | Procedimiento para construir historias en vivo con 6 personas |
+| [`docs/endpoints.md`](docs/endpoints.md) | Referencia de la API |
+
+---
+
+# ✨ Funcionalidades
+
+* 🎲 Ideas de proyecto completamente aleatorias
+* 🎯 Generación por nivel de dificultad (1 a 5)
+* 🔒 Fija los rodillos que quieras y deja el resto al azar
+* 🤖 Descripción redactada por IA, con **modo degradado** si el proveedor cae
+* 🕘 Historial de las últimas ideas generadas
+* 🖥️ Interfaz web de máquina tragamonedas, responsiva
+* ⚡ API REST documentada con OpenAPI
+* 🐘 PostgreSQL con integridad referencial explícita
+* 🛡️ Rate limiting, cabeceras de seguridad, CORS con lista blanca, errores sin fugas
+* 🧪 204 pruebas automatizadas
+* 🐳 Un solo contenedor: frontend + API
+* ☁️ Despliegue continuo en Railway
+
+---
+
+# 🏗 Stack
+
+**Backend** FastAPI · SQLModel · SQLAlchemy · Pydantic v2 · Alembic · uv
+**Frontend** React 19 · TypeScript · Vite (sin librería de componentes)
+**Datos** PostgreSQL 17
+**IA** Interfaz `AIGateway` con proveedores Groq (producción), Ollama (local), LM Studio, Clojure (PoC) y stub determinístico
+**Calidad** Pytest · Ruff · ty · pre-commit · gitleaks · pip-audit
+**Infra** Docker multi-stage · GitHub Actions · Railway
+
+---
+
+# 🚀 Arranque rápido
+
+## Con Docker (todo incluido)
 
 ```bash
+git clone https://github.com/SantiagoAlvP/Proyecto_Aplicando_IA_SDD_Roullete.git
+cd Proyecto_Aplicando_IA_SDD_Roullete
 docker compose up api postgres
 ```
 
+Abre http://localhost:9600
+
+## Desarrollo local
+
+```bash
+uv sync
+cp .env.example .env          # ajusta lo que necesites
+
+# Base de datos
+docker compose up -d postgres
+
+# Backend (:9600)
+uv run python project_jackpot.py
+
+# Frontend con recarga en caliente (:5173, proxy a :9600)
+cd frontend && npm install && npm run dev
+```
+
+> **Sin API key de IA la aplicación funciona igual**: arranca en modo degradado con
+> descripciones por plantilla y lo advierte en el log. Para activar el LLM, consigue
+> una clave gratuita en [console.groq.com](https://console.groq.com) y ponla en
+> `GROQ_API_KEY`. Nunca la escribas en un archivo versionado.
+
 ---
 
-# 📖 API Documentation
-
-After starting the project, the documentation is available at:
-
-Swagger UI
+# 📖 Documentación de la API
 
 ```
-http://127.0.0.1:9600/api/docs
+http://localhost:9600/api/docs      # Swagger UI
+http://localhost:9600/api/redocs    # ReDoc
 ```
 
-ReDoc
-
-```
-http://127.0.0.1:9600/api/redocs
-```
+Referencia completa en [`docs/endpoints.md`](docs/endpoints.md).
 
 ---
 
-# 📚 API Endpoints
-
-## Health
-
-| Method | Endpoint      | Description  |
-| ------ | ------------- | ------------ |
-| GET    | `/api/health` | Health check |
-
----
-
-## Catalog
-
-| Method | Endpoint                                       |
-| ------ | ---------------------------------------------- |
-| GET    | `/api/v1/catalog/programming-languages`        |
-| GET    | `/api/v1/catalog/programming-languages/random` |
-| GET    | `/api/v1/catalog/technologies`                 |
-| GET    | `/api/v1/catalog/technologies/random`          |
-| GET    | `/api/v1/catalog/addons`                       |
-| GET    | `/api/v1/catalog/addons/random`                |
-
----
-
-## Project Generator
-
-| Method | Endpoint                                                   | Description                          |
-| ------ | ---------------------------------------------------------- | ------------------------------------ |
-| POST   | `/api/v1/ensemble_project/generate_project_totally_random` | Generate a completely random project |
-| POST   | `/api/v1/ensemble_project/generate_project_by_level`       | Generate by difficulty level         |
-| POST   | `/api/v1/ensemble_project/generate_project_by_value`       | Generate using selected technologies |
-
----
-
-# 🎲 Example Response
+# 🎲 Ejemplo de respuesta
 
 ```json
 {
-  "programming_language": "Python",
-  "technologies": "REST/SOAP APIs",
-  "addons": "pytest",
+  "programming_language": "C",
+  "technologies": "DNS Server",
+  "addons": "Session Management",
   "extras": [
-    {
-      "programming_language": "Clojure",
-      "technologies": "Recommendation Engine",
-      "addons": "Docker"
-    },
-    {
-      "programming_language": "None",
-      "technologies": "GenAI and LLM",
-      "addons": "Best Practices"
-    }
+    { "programming_language": "Erlang", "technologies": "API Gateway", "addons": "Closest Pair of Points" },
+    { "programming_language": "COBOL", "technologies": "Event Streaming Platform", "addons": null }
   ],
   "level": 3,
-  "description": "Build a Python application that integrates with REST/SOAP APIs, is fully tested with pytest, and incorporates a Clojure-powered recommendation engine for create projects running in Docker. Enhance the system with GenAI and LLM capabilities, following modern software engineering best practices to create a scalable, maintainable, and production-ready solution."
+  "description": "Build a DNS Server project in C, using Session Management as a supporting tool. You will practise designing the core domain, wiring the pieces together and testing them end to end."
 }
 ```
+
 <p align="center">
   <img src="https://github.com/jero98772/project_roulette/blob/dev/docs/pictures/meme.png?raw=true" alt="meme" width="500">
 </p>
 
 ---
 
-# 📂 Project Structure
+# 📂 Estructura
 
 ```text
 .
-├── alembic/                 # Database migrations
+├── .specify/                # motor SDD: constitución, plantillas, scripts
+├── specs/                   # una carpeta por funcionalidad: spec, plan, tasks
+├── alembic/                 # migraciones
 ├── core/
-│   ├── ai_gateway/          # AI providers
-│   ├── catalog/             # Catalog API and services
-│   ├── database/            # Database layer
-│   ├── ensemble_project/    # Project generation
-│   ├── health/              # Health endpoint
-│   └── settings/
-├── data/                    # Seed data
-├── docs/                    # Documentation
-├── tests/                   # Unit and integration tests
-├── Dockerfile
-├── docker-compose.yml
-├── project_jackpot.py
-└── pyproject.toml
+│   ├── ai_gateway/          # AIGateway (ABC) + proveedores + factory
+│   ├── catalog/             # router → service → repository
+│   ├── database/            # engine, modelos, CRUD, siembra
+│   ├── ensemble_project/    # generación de proyectos + advisor de IA
+│   ├── health/              # verificación de vida
+│   ├── security/            # rate limit, cabeceras, errores con request_id
+│   └── settings/            # configuración y middleware
+├── frontend/                # React 19 + Vite + TypeScript
+├── data/                    # catálogo semilla
+├── docs/                    # backlog, seguridad, caso de negocio, runbook
+├── tests/                   # 204 pruebas
+├── Dockerfile               # multi-stage: Node compila, Python sirve
+├── entrypoint.sh            # migra y arranca
+├── railway.json             # configuración de despliegue
+└── AGENTS.md                # reglas para agentes de IA
 ```
 
 ---
 
-# 🤝 Contributing
+# 🤝 Contribuir
 
-Contributions are welcome.
-
-Before opening a Pull Request, please ensure:
-
-* All tests pass.
-* Ruff reports no issues.
-* Ty passes without errors.
-* New features include appropriate tests.
-* Database changes include Alembic migrations when required.
-
-Recommended workflow:
+Antes de abrir un Pull Request:
 
 ```bash
-uv run pytest -v
+uv run pytest -q            # 204 passed
 uv run ruff format
 uv run ruff check --fix
 uv run ruff check
 uv run ty check
 ```
 
+Y además, porque este repositorio se rige por una constitución:
+
+* La funcionalidad tiene su especificación en `specs/` y está incluida en el diff.
+* Los cambios de esquema traen su migración de Alembic.
+* No hay secretos en el diff, ni `allow_origins=["*"]`, ni SQL concatenado.
+
+Lee [`AGENTS.md`](AGENTS.md) antes de escribir código —también si eres un agente de IA.
+
 ---
 
+# 📄 Licencia
 
-# 📄 License
-
-This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
-
-See the [LICENSE](LICENSE) file for details.
+**GNU General Public License v3.0 (GPL-3.0)** — ver [LICENSE](LICENSE).

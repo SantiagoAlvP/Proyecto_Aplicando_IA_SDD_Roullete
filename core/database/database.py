@@ -55,19 +55,34 @@ def seed_lookup_tables() -> None:
 
     total = sum(len(v) for v in inserted.values())
     if total:
+        # Counts, not contents: dumping 437 catalog names into production logs
+        # buries every other line and costs money on hosted log storage.
         logger.info(
-            "Seeded %d new rows → languages: %s | techs: %s | addons: %s",
+            "Seeded %d new rows (languages: %d, techs: %d, addons: %d).",
             total,
-            inserted["programming_languages"],
-            inserted["techs"],
-            inserted["addons"],
+            len(inserted["programming_languages"]),
+            len(inserted["techs"]),
+            len(inserted["addons"]),
         )
+        logger.debug("Seeded values: %s", inserted)
     else:
         logger.info("Seed: all lookup values already present, nothing inserted.")
 
 
 def init_db() -> None:
-    create_database_if_not_exists()
+    """Prepare the database for serving.
+
+    On a managed platform the database is provisioned for us and the
+    application user usually cannot connect to the maintenance database at all,
+    so CREATE DATABASE is skipped whenever DATABASE_URL is supplied
+    (spec 004, Edge Cases). Table creation stays idempotent either way: in the
+    container the schema already came from `alembic upgrade head`.
+    """
+    if settings.DATABASE_URL:
+        logger.info("DATABASE_URL provided; skipping database creation.")
+    else:
+        create_database_if_not_exists()
+
     create_tables()
     seed_lookup_tables()
 

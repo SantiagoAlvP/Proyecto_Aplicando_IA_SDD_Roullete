@@ -1,0 +1,98 @@
+name: CI
+
+# Quality gate for main. Railway only deploys what passes here
+# (Constitution, Principle VI; spec 004, FR-002).
+on:
+  push:
+    branches: [main, "[0-9][0-9][0-9]-*"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Tests, lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Tests
+        # Integration tests need live Postgres/Ollama and are opt-in.
+        run: uv run pytest -v
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run ty check
+
+  security:
+    name: Secrets and dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # gitleaks needs history to scan the diff, not just the tip.
+          fetch-depth: 0
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Audit dependencies for known vulnerabilities
+        run: |
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt > requirements.txt
+          uvx pip-audit --requirement requirements.txt --strict
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+
+      - name: Type check and build
+        working-directory: frontend
+        run: npm run build
+
+  docker:
+    name: Container build
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build the deployable image
+        # Proves the exact artefact Railway will build is valid before we
+        # discover it at deploy time.
+        run: docker build -t project-jackpot:ci .

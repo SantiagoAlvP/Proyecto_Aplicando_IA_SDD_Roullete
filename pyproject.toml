@@ -26,10 +26,19 @@ dependencies = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+# Integration tests need live Postgres / Ollama, so they are opt-in.
+# A suite that only passes when a daemon happens to be running is a broken
+# suite (Constitution, Principle III). Run them with: uv run pytest -m integration
+addopts = "-m 'not integration'"
+markers = [
+    "integration: requires live external services (Postgres, Ollama)",
+]
+asyncio_mode = "auto"
 
 [dependency-groups]
 dev = [
     "pre-commit>=4.6.0",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.15.15",
     "ty>=0.0.42",
 ]

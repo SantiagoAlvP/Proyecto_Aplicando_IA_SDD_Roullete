@@ -218,3 +218,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ── Frontend (Node) ──────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# ── Local tooling ────────────────────────────────────────────────────────────
+.ruff_cache/
+
+# Carpeta temporal: contiene archivos que Claude no puede borrar desde el
+# puente de dispositivo. Puedes eliminarla manualmente.
+_to_delete/

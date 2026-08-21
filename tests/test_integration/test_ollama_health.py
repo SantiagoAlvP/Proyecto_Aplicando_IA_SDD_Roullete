@@ -1,5 +1,10 @@
 import requests
 
+import pytest
+
+# Opt-in: these hit real services. See pyproject [tool.pytest.ini_options].
+pytestmark = pytest.mark.integration
+
 
 def test_ollama_ping():
     base_url = "http://localhost:11434"

@@ -1,30 +1,48 @@
+# Local development stack.
+#
+# This is NOT what runs in production: Ollama needs gigabytes of RAM and does
+# not fit any free tier, so production uses AI_PROVIDER=groq instead
+# (plan 004, D-01). The application code is identical; only the environment
+# differs (Constitution, Principle VI).
 services:
   api:
     build: .
-    container_name: fastapi
+    container_name: project_jackpot_api
     ports:
-      - "8000:8000"
+      - "9600:9600"
     depends_on:
-      - postgres
-      - ollama
+      postgres:
+        condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg://app_user:secret_password@postgres:5432/app_db
-      OLLAMA_URL: http://ollama:11434
+      ENVIRONMENT: development
+      PORT: 9600
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/project_jackpot_db
+      AI_PROVIDER: ollama
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: gemma3:1b
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
 
   postgres:
     image: postgres:17
-    container_name: postgres
+    container_name: project_jackpot_db
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_DB: project_jackpot_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Without this the API races the database and dies on first boot.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d project_jackpot_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   ollama:
     image: ollama/ollama:latest
+    container_name: project_jackpot_ollama
     ports:
       - "11434:11434"
     volumes:
@@ -34,14 +52,13 @@ services:
     image: ollama/ollama:latest
     depends_on:
       - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
     entrypoint: >
-      sh -c "
-      sleep 10 &&
-      ollama pull gemma4:e2b
-      "
+      sh -c "sleep 10 && ollama pull gemma3:1b"
     volumes:
       - ollama_data:/root/.ollama
+
 volumes:
   postgres_data:
   ollama_data:
-

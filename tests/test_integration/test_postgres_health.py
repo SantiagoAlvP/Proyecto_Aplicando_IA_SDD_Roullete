@@ -3,6 +3,11 @@ from sqlmodel import Session, text
 from core.database.database import engine
 from core.settings.default import AppSettings
 
+import pytest
+
+# Opt-in: these hit real services. See pyproject [tool.pytest.ini_options].
+pytestmark = pytest.mark.integration
+
 
 def test_postgres_is_alive_psycopg():
     settings = AppSettings()
@@ -25,7 +30,9 @@ def test_postgres_is_alive_psycopg():
 
 def test_postgres_is_alive_sqlmodel():
     with Session(engine) as session:
-        result = session.execute(text("SELECT 1"))
+        # Raw SQL smoke check: session.execute is the right API here, exec() is
+        # for SQLModel selects.
+        result = session.execute(text("SELECT 1"))  # ty: ignore[deprecated]
         row = result.one()
 
         assert row[0] == 1

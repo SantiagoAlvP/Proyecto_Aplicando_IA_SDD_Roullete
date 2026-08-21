@@ -16,6 +16,16 @@ Genera ideas de proyectos de software para retarte, aprender tecnologías nuevas
 
 ---
 
+> ## 👉 [**EMPEZAR-AQUI.md**](EMPEZAR-AQUI.md)
+>
+> **Punto de entrada único del proyecto.** Estado actual, URL desplegada,
+> preparación del equipo, guion de la presentación, procedimiento de
+> construcción en vivo y resolución de problemas.
+> Su Sección 1 son instrucciones para asistentes de IA: ábrelo con Claude Code
+> o Copilot y el agente sabe qué hacer.
+
+---
+
 ## 🚀 Qué es
 
 **Project Jackpot** es una máquina tragamonedas de ideas de proyectos: combina un

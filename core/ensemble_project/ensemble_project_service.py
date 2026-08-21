@@ -1,34 +1,48 @@
 import random
 from random import randint
-
+from typing import Protocol
 
 from core.catalog.catalog_repository import CatalogRepository
 from core.ensemble_project.api.ensemble_project_models import (
-    GenerateProjectByValueRequest,
-    Level,
-    ProjectResponse,
     Extras,
+    GenerateProjectByValueRequest,
+    HistoryEntry,
+    Level,
     NamedCatalogEntry,
+    ProjectResponse,
+    ProjectSelection,
 )
 from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
-from core.ensemble_project.ensemble_project_ai_gatway_service import (
-    ProjectGeneratorAIGateway,
-)
 from core.settings.default import AppSettings
 
-from core.settings.clojure_settings import ClojureProjectGeneratorAIGateway
+
+class ProjectAIAdvisor(Protocol):
+    """What this service needs from an AI collaborator - nothing more.
+
+    Depending on a Protocol rather than on a concrete gateway is what keeps the
+    Groq, Ollama, Clojure and stub implementations interchangeable, and what
+    lets every test here run with a plain double (Constitution, Principle II).
+    """
+
+    async def choose_valid_project(self, projects: list[dict]) -> ProjectSelection: ...
+
+    async def generate_description(self, project: dict) -> str: ...
 
 
 class ProjectGeneratorService:
     def __init__(
         self,
-        ai_gateway: ClojureProjectGeneratorAIGateway | ProjectGeneratorAIGateway,
+        ai_gateway: ProjectAIAdvisor,
         catalog_repo: CatalogRepository,
         project_repo: EnsembleProjectRepository,
     ):
         self.ai_gateway = ai_gateway
         self.catalog_repo = catalog_repo
         self.project_repo = project_repo
+
+    def get_history(self, limit: int) -> list[HistoryEntry]:
+        """Latest generated projects, most recent first (spec 002, HU-08)."""
+        return self.project_repo.list_recent(limit)
 
     async def generate_by_value(
         self, payload: GenerateProjectByValueRequest
@@ -109,7 +123,12 @@ class ProjectGeneratorService:
         if not selection.valid:
             raise ValueError(selection.reason or "No coherent project could be built.")
 
-        best = candidates[selection.best_index - 1]
+        index = selection.best_index - 1
+        if not 0 <= index < len(candidates):
+            # A model can return anything; an IndexError here would surface as
+            # a 500 for the user (spec 001, Edge Cases).
+            index = 0
+        best = candidates[index]
         best["description"] = await self.ai_gateway.generate_description(best)
         saved = self.project_repo.save_project(best)
         return ProjectResponse(**saved)

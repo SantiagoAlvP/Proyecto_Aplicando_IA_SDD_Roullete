@@ -19,7 +19,7 @@ class OpenAIGateway(AIGateway):
     async def generate(self, prompt: str) -> str:
         response = await self.client.chat.completions.create(
             model=self.model,
-            messages=settings.message_base(prompt),
+            messages=settings.message_base(prompt),  # ty: ignore[invalid-argument-type]
             temperature=settings.TEMPERATURE,
         )
         content = response.choices[0].message.content

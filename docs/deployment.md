@@ -64,7 +64,7 @@ En el servicio de la aplicación → **Variables**, añade:
 ENVIRONMENT=production
 AI_PROVIDER=groq
 GROQ_API_KEY=gsk_tu_clave_aqui
-GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL=openai/gpt-oss-20b
 CORS_ALLOWED_ORIGINS=https://TU-DOMINIO.up.railway.app
 RATE_LIMIT_REQUESTS=20
 RATE_LIMIT_WINDOW_SECONDS=60
@@ -140,7 +140,8 @@ vulnerable impiden el merge y, por tanto, el despliegue (spec 004, FR-002).
 | El build falla en `npm ci` | Falta `frontend/package-lock.json` | Haz commit del lock file |
 | `MIGRATION FAILED` en el log | `DATABASE_URL` mal referenciada | Revisa la referencia de variable al servicio de Postgres |
 | La app no arranca y el log menciona `CORS_ALLOWED_ORIGINS` | Pusiste `*` en producción | Pon el dominio exacto |
-| Todo responde 200 pero las descripciones son siempre iguales | Modo degradado | `GROQ_API_KEY` ausente o inválida |
+| Todo responde 200 pero las descripciones son siempre iguales | Modo degradado | `GROQ_API_KEY` ausente o inválida, **o `GROQ_MODEL` apunta a un modelo retirado** |
+| El log dice `AI description failed` | Groq rechaza la petición | Groq retira modelos con frecuencia. Verifica el id en https://console.groq.com/docs/models y actualiza `GROQ_MODEL` |
 | `429` constantes durante la demostración | Límite de tasa demasiado bajo para varios espectadores | Sube `RATE_LIMIT_REQUESTS` a 60 y redespliega |
 | La verificación de salud falla tras el deploy | Arranque en frío de Postgres | Railway reintenta; `healthcheckTimeout` está en 120 s |
 

@@ -84,7 +84,10 @@ class AppSettings(BaseSettings):
     # Groq (free tier, OpenAI-compatible) - production
     GROQ_API_KEY: str | None = None
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    # Groq retira modelos con frecuencia; un id retirado hace fallar la
+    # llamada y la app degrada al stub en silencio. Verificar el catalogo
+    # vigente en https://console.groq.com/docs/models antes de desplegar.
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
 
     # LM Studio - local desktop
     BASE_URL_LMSTUDIO: str = "http://localhost:1234/v1"

@@ -1,12 +1,26 @@
+# Local quality gate. Mirrors .github/workflows/ci.yml so a red CI is a
+# surprise, not a routine (Constitution, "Puertas de calidad").
 repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      # Catch a leaked API key before it ever reaches a remote, where removing
+      # it means rotating the credential rather than amending a commit.
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+
   - repo: local
     hooks:
-      - id: ty-check
-        name: ty check
-        entry: uv run ty check
-        language: system
-        pass_filenames: false
-
       - id: ruff-format
         name: ruff format
         entry: uv run ruff format
@@ -22,5 +36,17 @@ repos:
       - id: ruff-check
         name: ruff check
         entry: uv run ruff check
+        language: system
+        pass_filenames: false
+
+      - id: ty-check
+        name: ty check
+        entry: uv run ty check
+        language: system
+        pass_filenames: false
+
+      - id: pytest
+        name: pytest
+        entry: uv run pytest -q
         language: system
         pass_filenames: false

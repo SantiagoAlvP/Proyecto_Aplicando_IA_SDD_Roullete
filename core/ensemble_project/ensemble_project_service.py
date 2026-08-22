@@ -44,6 +44,24 @@ class ProjectGeneratorService:
         """Latest generated projects, most recent first (spec 002, HU-08)."""
         return self.project_repo.list_recent(limit)
 
+    def get_favorites(self, limit: int) -> list[HistoryEntry]:
+        """Only favorited projects, most recent first (spec 005, HU-11)."""
+        return self.project_repo.list_favorites(limit)
+
+    def mark_favorite(self, project_id: int) -> HistoryEntry:
+        """Mark a project as favorite. Idempotent (spec 005, FR-005)."""
+        entry = self.project_repo.set_favorite(project_id, True)
+        if entry is None:
+            raise LookupError(f"Project {project_id} not found.")
+        return entry
+
+    def unmark_favorite(self, project_id: int) -> HistoryEntry:
+        """Unmark a project as favorite. Idempotent (spec 005, FR-006)."""
+        entry = self.project_repo.set_favorite(project_id, False)
+        if entry is None:
+            raise LookupError(f"Project {project_id} not found.")
+        return entry
+
     async def generate_by_value(
         self, payload: GenerateProjectByValueRequest
     ) -> ProjectResponse:

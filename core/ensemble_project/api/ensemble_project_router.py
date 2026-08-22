@@ -5,7 +5,7 @@ domain errors into status codes. It never touches the database and never picks
 an AI provider itself (Constitution, Principle II).
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel import Session
 
 from core.ai_gateway.factory import get_ai_gateway
@@ -96,3 +96,41 @@ async def get_history(
 ) -> list[HistoryEntry]:
     """Most recently generated projects, newest first."""
     return service.get_history(limit)
+
+
+@router.get("/favorites", response_model=list[HistoryEntry])
+async def get_favorites(
+    limit: int = Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="How many of the most recently favorited projects to return.",
+    ),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> list[HistoryEntry]:
+    """Only favorited projects, newest first (spec 005, HU-11)."""
+    return service.get_favorites(limit)
+
+
+@router.put("/{project_id}/favorite", response_model=HistoryEntry)
+async def mark_favorite(
+    project_id: int = Path(gt=0),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> HistoryEntry:
+    """Mark a project as favorite. Idempotent (spec 005, FR-005)."""
+    try:
+        return service.mark_favorite(project_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.delete("/{project_id}/favorite", response_model=HistoryEntry)
+async def unmark_favorite(
+    project_id: int = Path(gt=0),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> HistoryEntry:
+    """Unmark a project as favorite. Idempotent (spec 005, FR-006)."""
+    try:
+        return service.unmark_favorite(project_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

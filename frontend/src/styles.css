@@ -268,6 +268,38 @@ body {
   white-space: nowrap;
 }
 
+/* ── favorites ───────────────────────────────────────────────────────────── */
+
+.favorite-toggle {
+  font: inherit;
+  font-weight: 700;
+  background: var(--bg-inset);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.favorite-toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.favorite-toggle--small {
+  align-self: flex-end;
+  margin-top: 0.3rem;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.alert--inline {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
 .result__description {
   color: var(--text-muted);
   max-height: 12rem;
@@ -343,7 +375,40 @@ body {
   cursor: pointer;
 }
 
-/* ── history ─────────────────────────────────────────────────────────────── */
+/* ── history / favorites panel ──────────────────────────────────────────── */
+
+.page__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.panel__tabs {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.panel__tab {
+  flex: 1;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.5rem 0.6rem;
+  cursor: pointer;
+}
+
+.panel__tab--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
 
 .history {
   background: var(--bg-panel);

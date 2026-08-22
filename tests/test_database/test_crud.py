@@ -171,11 +171,18 @@ class TestProjectCRUD:
             description="My API",
             project_tech_id=2,
             project_addon_id=3,
+            level=4,
         )
 
         assert result.description == "My API"
         assert result.project_tech_id == 2
         assert result.project_addon_id == 3
+        assert result.level == 4
+
+    def test_create_without_level_defaults_to_none(self, session):
+        result = ProjectCRUD.create(session, programming_language_id=1)
+
+        assert result.level is None
 
     def test_get_returns_project(self, session):
         project = Project(id=1, programming_language_id=1)
@@ -203,6 +210,52 @@ class TestProjectCRUD:
         result = ProjectCRUD.get_all(session)
 
         assert len(result) == 2
+
+    def test_get_favorites_returns_favorited_projects(self, session):
+        favorites = [
+            Project(id=2, programming_language_id=1, is_favorite=True),
+            Project(id=1, programming_language_id=1, is_favorite=True),
+        ]
+        session.exec.return_value.all.return_value = favorites
+
+        result = ProjectCRUD.get_favorites(session, 10)
+
+        assert len(result) == 2
+
+    def test_get_favorites_empty(self, session):
+        session.exec.return_value.all.return_value = []
+
+        result = ProjectCRUD.get_favorites(session, 10)
+
+        assert result == []
+
+    def test_set_favorite_true_updates_and_commits(self, session):
+        project = Project(id=1, programming_language_id=1, is_favorite=False)
+        session.get.return_value = project
+
+        result = ProjectCRUD.set_favorite(session, 1, True)
+
+        assert result is not None
+        assert result.is_favorite is True
+        session.add.assert_called_once_with(project)
+        session.commit.assert_called_once()
+
+    def test_set_favorite_false_updates(self, session):
+        project = Project(id=1, programming_language_id=1, is_favorite=True)
+        session.get.return_value = project
+
+        result = ProjectCRUD.set_favorite(session, 1, False)
+
+        assert result is not None
+        assert result.is_favorite is False
+
+    def test_set_favorite_on_missing_project_returns_none(self, session):
+        session.get.return_value = None
+
+        result = ProjectCRUD.set_favorite(session, 999, True)
+
+        assert result is None
+        session.add.assert_not_called()
 
 
 class TestProjectExtraCRUD:

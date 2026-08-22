@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlmodel import Session
 from core.database.crud import (
     AddonCRUD,
@@ -11,7 +13,11 @@ from core.ensemble_project.api.ensemble_project_validation import (
     get_or_create_id,
     optional_id,
 )
-from core.ensemble_project.api.ensemble_project_models import Entity, HistoryEntry
+from core.ensemble_project.api.ensemble_project_models import (
+    Entity,
+    Extras,
+    HistoryEntry,
+)
 
 
 class EnsembleProjectRepository:
@@ -32,8 +38,11 @@ class EnsembleProjectRepository:
             description=project.get("description", "")[:500],
             project_tech_id=tech_id,
             project_addon_id=addon_id,
+            level=project.get("level"),
         )
         saved_id = Entity.model_validate(saved).id
+        project["id"] = saved_id
+        project["favorite"] = False
 
         for extra in project.get("extras", []):
             extra_lang_name = (
@@ -64,21 +73,58 @@ class EnsembleProjectRepository:
         and the router to be tested without a database.
         """
         projects = ProjectCRUD.get_recent(self.session, limit)
-        entries: list[HistoryEntry] = []
-        for project in projects:
-            entries.append(
-                HistoryEntry(
-                    id=project.id or 0,
-                    programming_language=_name_of(project.programming_language),
-                    technologies=_name_of(project.tech),
-                    addons=_name_of(project.addon),
-                    description=project.description or "",
-                )
-            )
-        return entries
+        return [_to_history_entry(project) for project in projects]
+
+    def list_favorites(self, limit: int) -> list[HistoryEntry]:
+        """Only favorited projects, most recent first (spec 005, HU-11)."""
+        projects = ProjectCRUD.get_favorites(self.session, limit)
+        return [_to_history_entry(project) for project in projects]
+
+    def set_favorite(self, project_id: int, value: bool) -> Optional[HistoryEntry]:
+        """Mark or unmark a project as favorite. `None` if it does not exist."""
+        project = ProjectCRUD.set_favorite(self.session, project_id, value)
+        if project is None:
+            return None
+        return _to_history_entry(project)
+
+
+def _to_history_entry(project: object) -> HistoryEntry:
+    return HistoryEntry(
+        id=getattr(project, "id", None) or 0,
+        programming_language=_name_of(getattr(project, "programming_language", None)),
+        technologies=_name_of(getattr(project, "tech", None)),
+        addons=_name_of(getattr(project, "addon", None)),
+        level=getattr(project, "level", None),
+        extras=_extras_of(project),
+        description=getattr(project, "description", None) or "",
+        favorite=bool(getattr(project, "is_favorite", False)),
+    )
 
 
 def _name_of(entity: object) -> str:
     """A catalog row may be missing on legacy data; never return None."""
     name = getattr(entity, "name", None)
     return str(name) if name else "Unknown"
+
+
+def _extra_name_of(entity: object) -> str | None:
+    """Unlike the project's own catalog fields, an extra's sub-field is
+    legitimately optional: `None` here means "not set", not "missing data".
+    """
+    name = getattr(entity, "name", None)
+    return str(name) if name else None
+
+
+def _extras_of(project: object) -> list[Extras]:
+    """Read from the ORM relationship already loaded on `project.extras` -
+    no additional query needed (spec 005, D-06)."""
+    return [
+        Extras(
+            programming_language=_extra_name_of(
+                getattr(extra, "programming_language", None)
+            ),
+            technologies=_extra_name_of(getattr(extra, "tech", None)),
+            addons=_extra_name_of(getattr(extra, "addon", None)),
+        )
+        for extra in getattr(project, "extras", None) or []
+    ]

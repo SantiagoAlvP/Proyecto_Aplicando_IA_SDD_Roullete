@@ -49,6 +49,10 @@ class ProjectResponse(BaseModel):
     description: str
 
 
+class RegenerationResponse(ProjectResponse):
+    id: int
+
+
 class HistoryEntry(BaseModel):
     """One previously generated project, as shown in the history panel."""
 

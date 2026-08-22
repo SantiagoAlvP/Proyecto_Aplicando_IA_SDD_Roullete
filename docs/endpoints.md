@@ -33,6 +33,7 @@ Los endpoints `/random` devuelven `null` (no un `500`) cuando la tabla está vac
 | POST | `/api/v1/ensemble_project/generate_project_by_level` | Proyecto por dificultad | `{"level": 1..5}` |
 | POST | `/api/v1/ensemble_project/generate_project_by_value` | Proyecto con valores fijados | ver abajo |
 | GET | `/api/v1/ensemble_project/history?limit=10` | Últimos proyectos generados | `limit` entre 1 y 50 |
+| POST | `/api/v1/ensemble_project/{project_id}/regenerate_description` | Regenera solo la descripción de un proyecto existente | Sin cuerpo |
 
 Cuerpo de `generate_project_by_value` — un campo vacío significa "al azar":
 
@@ -52,6 +53,7 @@ Cuerpo de `generate_project_by_value` — un campo vacío significa "al azar":
 |---|---|
 | `200` | Consulta correcta |
 | `201` | Proyecto generado y persistido |
+| `404` | El proyecto solicitado no existe |
 | `413` | Cuerpo de la petición mayor a `MAX_BODY_BYTES` (64 KiB por defecto) |
 | `422` | Entrada inválida, o combinación técnicamente inviable según la IA |
 | `429` | Límite de tasa superado. Incluye `Retry-After` |

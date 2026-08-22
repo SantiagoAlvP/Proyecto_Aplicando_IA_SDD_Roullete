@@ -90,15 +90,30 @@ class ProjectCRUD:
         session: Session,
         programming_language_id: int,
         description: Optional[str] = None,
+        level: int = 1,
         project_tech_id: Optional[int] = None,
         project_addon_id: Optional[int] = None,
     ) -> Project:
         project = Project(
             description=description,
+            level=level,
             programming_language_id=programming_language_id,
             project_tech_id=cast(int, project_tech_id),
             project_addon_id=cast(int, project_addon_id),
         )
+        session.add(project)
+        session.commit()
+        session.refresh(project)
+        return project
+
+    @staticmethod
+    def update_description(
+        session: Session, project_id: int, description: str
+    ) -> Optional[Project]:
+        project = session.get(Project, project_id)
+        if project is None:
+            return None
+        project.description = description[:500]
         session.add(project)
         session.commit()
         session.refresh(project)

@@ -5,7 +5,7 @@ domain errors into status codes. It never touches the database and never picks
 an AI provider itself (Constitution, Principle II).
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel import Session
 
 from core.ai_gateway.factory import get_ai_gateway
@@ -17,9 +17,13 @@ from core.ensemble_project.api.ensemble_project_models import (
     HistoryEntry,
     Level,
     ProjectResponse,
+    RegenerationResponse,
 )
 from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
-from core.ensemble_project.ensemble_project_service import ProjectGeneratorService
+from core.ensemble_project.ensemble_project_service import (
+    ProjectGeneratorService,
+    ProjectNotFoundError,
+)
 from core.settings.default import AppSettings
 
 router = APIRouter(prefix="/ensemble_project", tags=["ensemble_project"])
@@ -96,3 +100,20 @@ async def get_history(
 ) -> list[HistoryEntry]:
     """Most recently generated projects, newest first."""
     return service.get_history(limit)
+
+
+@router.post(
+    "/{project_id}/regenerate_description",
+    response_model=RegenerationResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def regenerate_description(
+    project_id: int = Path(ge=1),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> RegenerationResponse:
+    try:
+        return await service.regenerate_description(project_id)
+    except ProjectNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

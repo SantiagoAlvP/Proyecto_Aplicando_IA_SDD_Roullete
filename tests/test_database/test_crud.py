@@ -177,6 +177,31 @@ class TestProjectCRUD:
         assert result.project_tech_id == 2
         assert result.project_addon_id == 3
 
+    def test_create_persists_level(self, session):
+        result = ProjectCRUD.create(session, programming_language_id=1, level=4)
+
+        assert result.level == 4
+
+    def test_update_description_changes_only_description(self, session):
+        project = Project(
+            id=7,
+            description="Old description",
+            level=3,
+            programming_language_id=1,
+            project_tech_id=2,
+            project_addon_id=3,
+        )
+        session.get.return_value = project
+
+        result = ProjectCRUD.update_description(session, 7, "New description")
+
+        assert result is project
+        assert result.description == "New description"
+        assert result.level == 3
+        assert result.programming_language_id == 1
+        assert result.project_tech_id == 2
+        assert result.project_addon_id == 3
+
     def test_get_returns_project(self, session):
         project = Project(id=1, programming_language_id=1)
         session.get.return_value = project

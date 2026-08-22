@@ -1,4 +1,6 @@
+import logging
 import random
+import re
 from random import randint
 from typing import Protocol
 
@@ -11,9 +13,16 @@ from core.ensemble_project.api.ensemble_project_models import (
     NamedCatalogEntry,
     ProjectResponse,
     ProjectSelection,
+    RegenerationResponse,
 )
 from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
 from core.settings.default import AppSettings
+
+logger = logging.getLogger(__name__)
+
+
+class ProjectNotFoundError(ValueError):
+    pass
 
 
 class ProjectAIAdvisor(Protocol):
@@ -43,6 +52,50 @@ class ProjectGeneratorService:
     def get_history(self, limit: int) -> list[HistoryEntry]:
         """Latest generated projects, most recent first (spec 002, HU-08)."""
         return self.project_repo.list_recent(limit)
+
+    async def regenerate_description(self, project_id: int) -> RegenerationResponse:
+        project = self.project_repo.get_project_for_regeneration(project_id)
+        if project is None:
+            raise ProjectNotFoundError("Project not found.")
+
+        previous = str(project.get("description", "")).strip()
+        try:
+            generated = await self.ai_gateway.generate_description(project)
+        except Exception:  # noqa: BLE001 - degraded mode is a product requirement
+            logger.exception("AI regeneration failed; using deterministic fallback.")
+            generated = self._fallback_description(project, previous)
+
+        description = self._valid_alternative(generated, previous)
+        if description is None:
+            return RegenerationResponse(**project)
+
+        updated = self.project_repo.update_description(project_id, description)
+        return RegenerationResponse(**updated)
+
+    @staticmethod
+    def _valid_alternative(text: str, previous: str) -> str | None:
+        candidate = str(text or "").strip()
+        if not candidate or len(candidate) >= 400 or candidate == previous:
+            return None
+        if "\n- " in candidate or "```" in candidate:
+            return None
+        sentences = re.findall(r"[^.!?]+[.!?](?=\s|$)", candidate)
+        if not 2 <= len(sentences) <= 4:
+            return None
+        return candidate
+
+    @staticmethod
+    def _fallback_description(project: dict, previous: str) -> str:
+        candidate = (
+            f"Construye un proyecto con {project.get('programming_language')}, "
+            f"{project.get('technologies')} y {project.get('addons')}. "
+            "Aprende a integrar sus piezas en una solución funcional."
+        )
+        if candidate == previous:
+            candidate = candidate.replace(
+                "solución funcional.", "una solución mantenible."
+            )
+        return candidate[:399]
 
     async def generate_by_value(
         self, payload: GenerateProjectByValueRequest

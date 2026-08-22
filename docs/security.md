@@ -41,6 +41,7 @@ entrega académica depende de que la aplicación esté en línea y respondiendo.
 - Devuelve `429` con `Retry-After` y cabeceras `X-RateLimit-*`.
 - **Exime `/api/health`**: la plataforma lo usa como verificación de vida; limitarlo tumbaría los despliegues.
 - **Exime el preflight `OPTIONS`**: no es una petición real; contarlo reduciría a la mitad el presupuesto de cada cliente de navegador.
+- La regeneración de descripciones (`POST /api/v1/ensemble_project/{project_id}/regenerate_description`) queda protegida por este mismo límite porque consume el proveedor de IA.
 
 Verificado en `tests/test_security/test_rate_limit.py` (6 tests) y probado en vivo.
 

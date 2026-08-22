@@ -30,6 +30,7 @@ class EnsembleProjectRepository:
             session=self.session,
             programming_language_id=lang_id,
             description=project.get("description", "")[:500],
+            level=project.get("level", 1),
             project_tech_id=tech_id,
             project_addon_id=addon_id,
         )
@@ -57,6 +58,40 @@ class EnsembleProjectRepository:
 
         return project
 
+    def get_project_for_regeneration(self, project_id: int) -> dict | None:
+        project = ProjectCRUD.get(self.session, project_id)
+        if project is None:
+            return None
+
+        extras = []
+        for extra in ProjectExtraCRUD.get_by_project(self.session, project_id):
+            extras.append(
+                {
+                    "programming_language": _name_of(extra.programming_language),
+                    "technologies": _optional_name(extra.tech),
+                    "addons": _optional_name(extra.addon),
+                }
+            )
+
+        return {
+            "id": project.id or project_id,
+            "programming_language": _name_of(project.programming_language),
+            "technologies": _name_of(project.tech),
+            "addons": _name_of(project.addon),
+            "extras": extras,
+            "level": project.level,
+            "description": project.description or "",
+        }
+
+    def update_description(self, project_id: int, description: str) -> dict:
+        updated = ProjectCRUD.update_description(self.session, project_id, description)
+        if updated is None:
+            raise ValueError("Project not found.")
+        result = self.get_project_for_regeneration(project_id)
+        if result is None:
+            raise ValueError("Project not found.")
+        return result
+
     def list_recent(self, limit: int) -> list[HistoryEntry]:
         """Return the latest projects as DTOs, never as ORM entities.
 
@@ -82,3 +117,8 @@ def _name_of(entity: object) -> str:
     """A catalog row may be missing on legacy data; never return None."""
     name = getattr(entity, "name", None)
     return str(name) if name else "Unknown"
+
+
+def _optional_name(entity: object) -> str | None:
+    name = getattr(entity, "name", None)
+    return str(name) if name else None

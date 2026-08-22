@@ -91,5 +91,8 @@ def test_entries_expose_the_expected_shape(client_and_service) -> None:
         "programming_language",
         "technologies",
         "addons",
+        "level",
+        "extras",
         "description",
+        "favorite",
     }

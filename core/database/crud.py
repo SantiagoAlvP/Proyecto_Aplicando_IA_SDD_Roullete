@@ -138,6 +138,30 @@ class ProjectCRUD:
             select(Project).order_by(col(Project.id).desc()).limit(limit)
         ).all()
 
+    @staticmethod
+    def get_favorites(session: Session, limit: int) -> Sequence[Project]:
+        """Only favorited projects, most recent first, limit applied in SQL."""
+        return session.exec(
+            select(Project)
+            .where(col(Project.is_favorite).is_(True))
+            .order_by(col(Project.id).desc())
+            .limit(limit)
+        ).all()
+
+    @staticmethod
+    def set_favorite(
+        session: Session, project_id: int, value: bool
+    ) -> Optional[Project]:
+        """Mark or unmark a project as favorite. `None` if it does not exist."""
+        project = session.get(Project, project_id)
+        if project is None:
+            return None
+        project.is_favorite = value
+        session.add(project)
+        session.commit()
+        session.refresh(project)
+        return project
+
 
 class ProjectExtraCRUD:
     @staticmethod

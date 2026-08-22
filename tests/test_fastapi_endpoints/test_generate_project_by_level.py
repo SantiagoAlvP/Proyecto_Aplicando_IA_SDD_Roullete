@@ -34,6 +34,7 @@ def test_generate_by_level_level_is_preserved(client_with_mocks):
 
     for lvl in [1, 3, 5]:
         project_repo.save_project.return_value = {
+            "id": 1,
             "programming_language": "Python",
             "technologies": "FastAPI",
             "addons": "PostgreSQL",

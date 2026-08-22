@@ -2,6 +2,8 @@ import type { Project } from "../types";
 
 interface ResultCardProps {
   project: Project;
+  onToggleFavorite: () => void;
+  favoritePending: boolean;
 }
 
 function describeExtra(extra: Project["extras"][number]): string {
@@ -10,7 +12,11 @@ function describeExtra(extra: Project["extras"][number]): string {
     .join(" · ");
 }
 
-export function ResultCard({ project }: ResultCardProps) {
+export function ResultCard({
+  project,
+  onToggleFavorite,
+  favoritePending,
+}: ResultCardProps) {
   const extras = project.extras.map(describeExtra).filter((text) => text.length > 0);
 
   return (
@@ -20,6 +26,15 @@ export function ResultCard({ project }: ResultCardProps) {
           {project.technologies} en {project.programming_language}
         </h2>
         <span className="result__level">Nivel {project.level}</span>
+        <button
+          type="button"
+          className="favorite-toggle"
+          aria-pressed={project.favorite}
+          disabled={favoritePending}
+          onClick={onToggleFavorite}
+        >
+          {project.favorite ? "★ Favorito" : "☆ Marcar como favorito"}
+        </button>
       </header>
 
       <p className="result__description">{project.description}</p>

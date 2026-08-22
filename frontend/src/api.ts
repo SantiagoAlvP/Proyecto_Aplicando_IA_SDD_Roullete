@@ -74,6 +74,19 @@ export const api = {
   history: (limit = 8) =>
     request<HistoryEntry[]>(`${BASE}/ensemble_project/history?limit=${limit}`),
 
+  favorites: (limit = 50) =>
+    request<HistoryEntry[]>(`${BASE}/ensemble_project/favorites?limit=${limit}`),
+
+  markFavorite: (id: number) =>
+    request<HistoryEntry>(`${BASE}/ensemble_project/${id}/favorite`, {
+      method: "PUT",
+    }),
+
+  unmarkFavorite: (id: number) =>
+    request<HistoryEntry>(`${BASE}/ensemble_project/${id}/favorite`, {
+      method: "DELETE",
+    }),
+
   generateByLevel: (level: number) =>
     request<Project>(`${BASE}/ensemble_project/generate_project_by_level`, {
       method: "POST",

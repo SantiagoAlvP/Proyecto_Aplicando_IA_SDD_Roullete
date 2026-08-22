@@ -1,18 +1,26 @@
 import type { HistoryEntry } from "../types";
 
 interface HistoryProps {
+  title: string;
   entries: HistoryEntry[];
+  emptyMessage: string;
+  onToggleFavorite: (entry: HistoryEntry) => void;
+  pendingId: number | null;
 }
 
-export function History({ entries }: HistoryProps) {
+export function History({
+  title,
+  entries,
+  emptyMessage,
+  onToggleFavorite,
+  pendingId,
+}: HistoryProps) {
   return (
-    <aside className="history" aria-label="Historial">
-      <h2 className="history__title">Últimas ideas</h2>
+    <aside className="history" aria-label={title}>
+      <h2 className="history__title">{title}</h2>
 
       {entries.length === 0 ? (
-        <p className="history__empty">
-          Todavía no hay nada por aquí. Gira para estrenar el historial.
-        </p>
+        <p className="history__empty">{emptyMessage}</p>
       ) : (
         <ul className="history__list">
           {entries.map((entry) => (
@@ -21,6 +29,15 @@ export function History({ entries }: HistoryProps) {
                 {entry.technologies} · {entry.programming_language}
               </span>
               <span className="history__addon">{entry.addons}</span>
+              <button
+                type="button"
+                className="favorite-toggle favorite-toggle--small"
+                aria-pressed={entry.favorite}
+                disabled={pendingId === entry.id}
+                onClick={() => onToggleFavorite(entry)}
+              >
+                {entry.favorite ? "★" : "☆"}
+              </button>
             </li>
           ))}
         </ul>

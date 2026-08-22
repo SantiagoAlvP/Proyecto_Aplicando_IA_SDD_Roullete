@@ -38,6 +38,7 @@ def test_generate_by_value_with_extras(client_with_mocks):
         ],
     }
     project_repo.save_project.return_value = {
+        "id": 1,
         "programming_language": "Python",
         "technologies": "FastAPI",
         "addons": "PostgreSQL",

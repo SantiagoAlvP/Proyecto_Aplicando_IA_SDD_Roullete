@@ -59,6 +59,7 @@ class Project(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     description: Optional[str] = Field(default=None, max_length=500)
+    is_favorite: bool = Field(default=False)
     level: int = Field(default=1, ge=1, le=5)
     programming_language_id: int = Field(
         foreign_key="project_programming_languages.id", nullable=False

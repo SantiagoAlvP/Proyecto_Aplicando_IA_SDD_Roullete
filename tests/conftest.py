@@ -9,12 +9,14 @@ from core.catalog.catalog_service import CatalogService, DefaultCatalogService
 from core.ensemble_project.api.ensemble_project_models import ProjectSelection
 
 SAVED_PROJECT = {
+    "id": 1,
     "programming_language": "Python",
     "technologies": "FastAPI",
     "addons": "PostgreSQL",
     "extras": [],
     "level": 3,
     "description": "Build a REST API with FastAPI and PostgreSQL.",
+    "favorite": False,
 }
 
 MOCK_DESCRIPTION = "Build a REST API with FastAPI and PostgreSQL."

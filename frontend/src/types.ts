@@ -14,12 +14,14 @@ export interface Extra {
 }
 
 export interface Project {
+  id: number;
   programming_language: string;
   technologies: string;
   addons: string;
   extras: Extra[];
   level: number;
   description: string;
+  favorite: boolean;
 }
 
 export interface HistoryEntry {
@@ -27,7 +29,10 @@ export interface HistoryEntry {
   programming_language: string;
   technologies: string;
   addons: string;
+  level: number | null;
+  extras: Extra[];
   description: string;
+  favorite: boolean;
 }
 
 export type ReelKey = "programming_language" | "technologies" | "addons";

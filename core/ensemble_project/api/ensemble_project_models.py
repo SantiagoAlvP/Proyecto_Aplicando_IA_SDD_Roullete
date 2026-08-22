@@ -41,12 +41,14 @@ class GenerateProjectByValueRequest(BaseModel):
 
 
 class ProjectResponse(BaseModel):
+    id: int
     programming_language: str
     technologies: str
     addons: str
     extras: list[Extras] = []
     level: int
     description: str
+    favorite: bool = False
 
 
 class RegenerationResponse(ProjectResponse):
@@ -54,7 +56,7 @@ class RegenerationResponse(ProjectResponse):
 
 
 class HistoryEntry(BaseModel):
-    """One previously generated project, as shown in the history panel."""
+    """One previously generated project, as shown in the history or favorites panel."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -62,7 +64,10 @@ class HistoryEntry(BaseModel):
     programming_language: str
     technologies: str
     addons: str
+    level: int | None = None
+    extras: list[Extras] = []
     description: str
+    favorite: bool = False
 
 
 class ValidationResult(BaseModel):

@@ -32,6 +32,10 @@ export default function App() {
   const [level, setLevel] = useState(3);
   const [project, setProject] = useState<Project | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [favorites, setFavorites] = useState<HistoryEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<"history" | "favorites">("history");
+  const [pendingFavoriteId, setPendingFavoriteId] = useState<number | null>(null);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,6 +54,14 @@ export default function App() {
     } catch {
       // The history is a convenience; failing to load it must never block the
       // main flow or replace the screen with an error.
+    }
+  }, []);
+
+  const refreshFavorites = useCallback(async () => {
+    try {
+      setFavorites(await api.favorites());
+    } catch {
+      // Same convenience guarantee as the history panel.
     }
   }, []);
 
@@ -75,10 +87,43 @@ export default function App() {
     })();
 
     void refreshHistory();
+    void refreshFavorites();
     return () => {
       cancelled = true;
     };
-  }, [refreshHistory]);
+  }, [refreshHistory, refreshFavorites]);
+
+  async function toggleFavorite(entry: { id: number; favorite: boolean }) {
+    if (pendingFavoriteId !== null) return;
+    setPendingFavoriteId(entry.id);
+    setFavoriteError(null);
+
+    try {
+      const updated = entry.favorite
+        ? await api.unmarkFavorite(entry.id)
+        : await api.markFavorite(entry.id);
+
+      setProject((current) =>
+        current && current.id === entry.id
+          ? { ...current, favorite: updated.favorite }
+          : current,
+      );
+      setHistory((current) =>
+        current.map((item) =>
+          item.id === entry.id ? { ...item, favorite: updated.favorite } : item,
+        ),
+      );
+      setFavorites((current) =>
+        updated.favorite
+          ? [updated, ...current.filter((item) => item.id !== entry.id)]
+          : current.filter((item) => item.id !== entry.id),
+      );
+    } catch (err) {
+      setFavoriteError(messageOf(err));
+    } finally {
+      setPendingFavoriteId(null);
+    }
+  }
 
   function toggleLock(key: ReelKey) {
     setReels((current) => ({
@@ -173,7 +218,19 @@ export default function App() {
             </div>
           )}
 
-          {project && !error && <ResultCard project={project} />}
+          {project && !error && (
+            <ResultCard
+              project={project}
+              onToggleFavorite={() => void toggleFavorite(project)}
+              favoritePending={pendingFavoriteId === project.id}
+            />
+          )}
+
+          {favoriteError && (
+            <p className="alert alert--inline" role="alert">
+              {favoriteError}
+            </p>
+          )}
 
           {!project && !error && !spinning && (
             <p className="placeholder">
@@ -182,7 +239,46 @@ export default function App() {
           )}
         </div>
 
-        <History entries={history} />
+        <div className="page__panel">
+          <div className="panel__tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "history"}
+              className={activeTab === "history" ? "panel__tab panel__tab--active" : "panel__tab"}
+              onClick={() => setActiveTab("history")}
+            >
+              Historial
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "favorites"}
+              className={activeTab === "favorites" ? "panel__tab panel__tab--active" : "panel__tab"}
+              onClick={() => setActiveTab("favorites")}
+            >
+              Favoritos
+            </button>
+          </div>
+
+          {activeTab === "history" ? (
+            <History
+              title="Últimas ideas"
+              entries={history}
+              emptyMessage="Todavía no hay nada por aquí. Gira para estrenar el historial."
+              onToggleFavorite={(entry) => void toggleFavorite(entry)}
+              pendingId={pendingFavoriteId}
+            />
+          ) : (
+            <History
+              title="Favoritos"
+              entries={favorites}
+              emptyMessage="Todavía no marcaste ningún proyecto como favorito."
+              onToggleFavorite={(entry) => void toggleFavorite(entry)}
+              pendingId={pendingFavoriteId}
+            />
+          )}
+        </div>
       </main>
 
       <footer className="page__footer">

@@ -117,3 +117,41 @@ async def regenerate_description(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/favorites", response_model=list[HistoryEntry])
+async def get_favorites(
+    limit: int = Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="How many of the most recently favorited projects to return.",
+    ),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> list[HistoryEntry]:
+    """Only favorited projects, newest first (spec 005, HU-11)."""
+    return service.get_favorites(limit)
+
+
+@router.put("/{project_id}/favorite", response_model=HistoryEntry)
+async def mark_favorite(
+    project_id: int = Path(gt=0),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> HistoryEntry:
+    """Mark a project as favorite. Idempotent (spec 005, FR-005)."""
+    try:
+        return service.mark_favorite(project_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.delete("/{project_id}/favorite", response_model=HistoryEntry)
+async def unmark_favorite(
+    project_id: int = Path(gt=0),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> HistoryEntry:
+    """Unmark a project as favorite. Idempotent (spec 005, FR-006)."""
+    try:
+        return service.unmark_favorite(project_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

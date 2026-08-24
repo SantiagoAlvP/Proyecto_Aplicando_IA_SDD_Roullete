@@ -5,7 +5,7 @@ domain errors into status codes. It never touches the database and never picks
 an AI provider itself (Constitution, Principle II).
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel import Session
 
 from core.ai_gateway.factory import get_ai_gateway
@@ -17,9 +17,13 @@ from core.ensemble_project.api.ensemble_project_models import (
     HistoryEntry,
     Level,
     ProjectResponse,
+    SharedProjectResponse,
 )
 from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
-from core.ensemble_project.ensemble_project_service import ProjectGeneratorService
+from core.ensemble_project.ensemble_project_service import (
+    ProjectGeneratorService,
+    ProjectNotFoundError,
+)
 from core.settings.default import AppSettings
 
 router = APIRouter(prefix="/ensemble_project", tags=["ensemble_project"])
@@ -96,3 +100,28 @@ async def get_history(
 ) -> list[HistoryEntry]:
     """Most recently generated projects, newest first."""
     return service.get_history(limit)
+
+
+@router.get("/shared/{share_token}", response_model=SharedProjectResponse)
+async def get_shared_project(
+    share_token: str = Path(
+        min_length=10,
+        max_length=64,
+        pattern=r"^[A-Za-z0-9_-]+$",
+        description="Opaque public token of a shared project.",
+    ),
+    service: ProjectGeneratorService = Depends(get_project_service),
+) -> SharedProjectResponse:
+    """Public read-only view behind a share link (HU-20, FR-001..FR-003).
+
+    No authentication: possession of the unguessable token is the capability.
+    Failures answer with a neutral message; details go to the log only.
+    """
+    try:
+        return service.get_shared_project(share_token)
+    except ProjectNotFoundError as exc:
+        # Correlation stays server-side; the client gets prose, not internals.
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Proyecto no disponible.",
+        ) from exc

@@ -407,6 +407,46 @@ body {
   color: var(--accent);
 }
 
+/* ── shared project view (HU-20) ─────────────────────────────────────────── */
+
+.shared-page {
+  max-width: 720px;
+}
+
+.shared-page__main {
+  display: block;
+}
+
+.shared-page__card {
+  display: flex;
+  flex-direction: column;
+}
+
+.shared-page__description {
+  margin-top: 0.8rem;
+}
+
+.shared-page__missing-title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.shared-page__cta {
+  margin-top: 1.2rem;
+  align-self: flex-start;
+  background: linear-gradient(120deg, var(--accent), var(--accent-deep));
+  color: #14100a;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+}
+
+.shared-page__cta:hover,
+.shared-page__cta:focus-visible {
+  filter: brightness(1.08);
+}
+
 /* ── responsive: usable down to 360px (spec 002, FR-007) ─────────────────── */
 
 @media (max-width: 900px) {

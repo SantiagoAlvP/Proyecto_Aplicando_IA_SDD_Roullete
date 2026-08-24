@@ -1,6 +1,18 @@
+from datetime import datetime, timezone
 from typing import Optional
 
+from secrets import token_urlsafe
+
 from sqlmodel import Field, Relationship, SQLModel
+
+
+def _new_share_token() -> str:
+    """Public identity of a project: opaque, unguessable, URL-safe.
+
+    12 bytes of entropy (~96 bits) render as ~16 characters, which fits the
+    `[A-Za-z0-9_-]{10,64}` contract enforced at the HTTP edge (HU-20, D-01).
+    """
+    return token_urlsafe(12)
 
 
 class ProjectProgrammingLanguage(SQLModel, table=True):
@@ -64,6 +76,24 @@ class Project(SQLModel, table=True):
     )
     project_tech_id: int = Field(default=None, foreign_key="project_techs.id")
     project_addon_id: int = Field(default=None, foreign_key="project_addons.id")
+
+    # HU-20: the share link is permanent (FR-006); the token lives and dies
+    # with the project and is never regenerated.
+    share_token: str = Field(
+        default_factory=_new_share_token,
+        unique=True,
+        index=True,
+        max_length=64,
+        nullable=False,
+    )
+    level: Optional[int] = Field(
+        default=None,
+        description="Difficulty 1..5; NULL for rows created before HU-20.",
+    )
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
     programming_language: Optional[ProjectProgrammingLanguage] = Relationship(
         back_populates="projects"

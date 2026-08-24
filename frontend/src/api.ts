@@ -1,7 +1,7 @@
 // The single network boundary. No component calls fetch directly, so a route
 // change or an error-shape change touches exactly one file.
 
-import type { CatalogEntry, HistoryEntry, Project } from "./types";
+import type { CatalogEntry, HistoryEntry, Project, SharedProject } from "./types";
 
 const BASE = "/api/v1";
 
@@ -73,6 +73,11 @@ export const api = {
 
   history: (limit = 8) =>
     request<HistoryEntry[]>(`${BASE}/ensemble_project/history?limit=${limit}`),
+
+  sharedProject: (token: string) =>
+    request<SharedProject>(
+      `${BASE}/ensemble_project/shared/${encodeURIComponent(token)}`,
+    ),
 
   generateByLevel: (level: number) =>
     request<Project>(`${BASE}/ensemble_project/generate_project_by_level`, {

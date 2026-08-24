@@ -30,6 +30,18 @@ export interface HistoryEntry {
   description: string;
 }
 
+// Read-only payload behind a share link (HU-20). `level` is null for projects
+// created before levels were persisted.
+export interface SharedProject {
+  share_token: string;
+  programming_language: string;
+  technologies: string;
+  addons: string;
+  extras: Extra[];
+  level: number | null;
+  description: string;
+}
+
 export type ReelKey = "programming_language" | "technologies" | "addons";
 
 export interface ReelState {

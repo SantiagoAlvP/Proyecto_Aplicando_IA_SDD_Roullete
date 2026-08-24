@@ -20,14 +20,18 @@ export interface Project {
   extras: Extra[];
   level: number;
   description: string;
+  // HU-20: present since the first generation response.
+  share_token: string;
 }
 
 export interface HistoryEntry {
   id: number;
+  share_token: string;
   programming_language: string;
   technologies: string;
   addons: string;
   description: string;
+  level: number | null;
 }
 
 // Read-only payload behind a share link (HU-20). `level` is null for projects

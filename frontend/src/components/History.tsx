@@ -1,3 +1,4 @@
+import { ShareButton } from "./ShareButton";
 import type { HistoryEntry } from "../types";
 
 interface HistoryProps {
@@ -21,6 +22,7 @@ export function History({ entries }: HistoryProps) {
                 {entry.technologies} · {entry.programming_language}
               </span>
               <span className="history__addon">{entry.addons}</span>
+              <ShareButton token={entry.share_token} label="Compartir enlace" />
             </li>
           ))}
         </ul>

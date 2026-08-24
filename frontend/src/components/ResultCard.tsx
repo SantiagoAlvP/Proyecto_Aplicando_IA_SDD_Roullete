@@ -1,3 +1,4 @@
+import { ShareButton } from "./ShareButton";
 import type { Project } from "../types";
 
 interface ResultCardProps {
@@ -49,6 +50,8 @@ export function ResultCard({ project }: ResultCardProps) {
           </ul>
         </div>
       )}
+
+      <ShareButton token={project.share_token} />
     </article>
   );
 }

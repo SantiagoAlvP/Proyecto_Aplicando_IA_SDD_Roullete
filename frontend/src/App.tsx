@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError } from "./api";
 import { History } from "./components/History";
 import { ResultCard } from "./components/ResultCard";
+import { SharedProject } from "./components/SharedProject";
 import { SlotMachine } from "./components/SlotMachine";
 import type {
   CatalogEntry,
@@ -13,6 +14,17 @@ import type {
 } from "./types";
 
 const SPIN_ANIMATION_MS = 700;
+
+// HU-20 (D-03): exactly one extra route; pathname inspection beats shipping a
+// routing library for it. Trailing slashes are tolerated - links get mangled
+// by chat apps when copied.
+const SHARED_ROUTE = /^\/proyecto\/([^/]+)$/;
+
+function detectSharedToken(pathname: string): string | null {
+  const normalized = pathname.replace(/\/+$/, "");
+  const match = SHARED_ROUTE.exec(normalized);
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
 const EMPTY_REELS: ReelsState = {
   programming_language: { value: "", locked: false },
@@ -27,6 +39,9 @@ const EMPTY_CATALOG: Record<ReelKey, CatalogEntry[]> = {
 };
 
 export default function App() {
+  // A share link must land on the public view without touching the machine:
+  // the route is decided once, at startup (HU-20, US1).
+  const [sharedToken] = useState(() => detectSharedToken(window.location.pathname));
   const [catalog, setCatalog] = useState(EMPTY_CATALOG);
   const [reels, setReels] = useState<ReelsState>(EMPTY_REELS);
   const [level, setLevel] = useState(3);
@@ -54,6 +69,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // A share link renders read-only content: no catalog, no history fetch.
+    if (sharedToken !== null) return;
+
     let cancelled = false;
 
     (async () => {
@@ -78,7 +96,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [refreshHistory]);
+  }, [refreshHistory, sharedToken]);
 
   function toggleLock(key: ReelKey) {
     setReels((current) => ({
@@ -137,6 +155,10 @@ export default function App() {
       setSpinning(false);
       inFlight.current = false;
     }
+  }
+
+  if (sharedToken !== null) {
+    return <SharedProject token={sharedToken} />;
   }
 
   return (

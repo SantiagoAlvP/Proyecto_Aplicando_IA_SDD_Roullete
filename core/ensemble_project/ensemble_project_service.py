@@ -11,9 +11,18 @@ from core.ensemble_project.api.ensemble_project_models import (
     NamedCatalogEntry,
     ProjectResponse,
     ProjectSelection,
+    SharedProjectResponse,
 )
 from core.ensemble_project.ensemble_project_repository import EnsembleProjectRepository
 from core.settings.default import AppSettings
+
+
+class ProjectNotFoundError(Exception):
+    """Domain signal: no project answers to this share token (HU-20).
+
+    The router is the only layer allowed to turn this into an HTTP 404, and it
+    must answer with a neutral message - never with the internal reason.
+    """
 
 
 class ProjectAIAdvisor(Protocol):
@@ -43,6 +52,15 @@ class ProjectGeneratorService:
     def get_history(self, limit: int) -> list[HistoryEntry]:
         """Latest generated projects, most recent first (spec 002, HU-08)."""
         return self.project_repo.list_recent(limit)
+
+    def get_shared_project(self, share_token: str) -> SharedProjectResponse:
+        """Public read-only view for a share link (HU-20, US1)."""
+        shared = self.project_repo.get_by_share_token(share_token)
+        if shared is None:
+            raise ProjectNotFoundError(
+                f"No project matches share token {share_token!r}"
+            )
+        return shared
 
     async def generate_by_value(
         self, payload: GenerateProjectByValueRequest

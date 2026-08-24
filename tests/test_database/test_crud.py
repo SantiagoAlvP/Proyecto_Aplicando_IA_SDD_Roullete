@@ -1,3 +1,5 @@
+import re
+
 from core.database.crud import (
     AddonCRUD,
     ProgrammingLanguageCRUD,
@@ -12,6 +14,8 @@ from core.database.models import (
     ProjectProgrammingLanguage,
     ProjectTech,
 )
+
+SHARE_TOKEN_PATTERN = re.compile(r"^[A-Za-z0-9_-]{10,64}$")
 
 
 class TestProgrammingLanguageCRUD:
@@ -203,6 +207,49 @@ class TestProjectCRUD:
         result = ProjectCRUD.get_all(session)
 
         assert len(result) == 2
+
+    def test_create_assigns_a_share_token(self, session):
+        """HU-20: every new project is born with its public identity."""
+        result = ProjectCRUD.create(session, programming_language_id=1)
+
+        assert SHARE_TOKEN_PATTERN.match(result.share_token)
+
+    def test_create_assigns_unique_share_tokens(self, session):
+        first = ProjectCRUD.create(session, programming_language_id=1)
+        second = ProjectCRUD.create(session, programming_language_id=2)
+
+        assert first.share_token != second.share_token
+
+    def test_create_persists_level_and_created_at(self, session):
+        from datetime import datetime
+
+        result = ProjectCRUD.create(session, programming_language_id=1, level=3)
+
+        assert result.level == 3
+        assert isinstance(result.created_at, datetime)
+        assert result.created_at.tzinfo is not None
+
+    def test_create_without_level_leaves_it_nullable(self, session):
+        result = ProjectCRUD.create(session, programming_language_id=1)
+
+        assert result.level is None
+
+    def test_get_by_share_token_returns_match(self, session):
+        project = Project(
+            id=1, programming_language_id=1, share_token="kX9m2LpQ_vR4wBn7"
+        )
+        session.exec.return_value.first.return_value = project
+
+        result = ProjectCRUD.get_by_share_token(session, "kX9m2LpQ_vR4wBn7")
+
+        assert result is project
+
+    def test_get_by_share_token_returns_none_when_missing(self, session):
+        session.exec.return_value.first.return_value = None
+
+        result = ProjectCRUD.get_by_share_token(session, "nope-token-noexiste")
+
+        assert result is None
 
 
 class TestProjectExtraCRUD:

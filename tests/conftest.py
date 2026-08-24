@@ -15,6 +15,7 @@ SAVED_PROJECT = {
     "extras": [],
     "level": 3,
     "description": "Build a REST API with FastAPI and PostgreSQL.",
+    "share_token": "kX9m2LpQ_vR4wBn7",
 }
 
 MOCK_DESCRIPTION = "Build a REST API with FastAPI and PostgreSQL."

@@ -10,6 +10,8 @@ def fake_project(project_id: int, *, language="Rust", description="A project."):
     project = MagicMock()
     project.id = project_id
     project.description = description
+    project.share_token = f"tok{project_id}en-share"
+    project.level = 3 if project_id % 2 == 0 else None
     project.programming_language.name = language
     project.tech.name = "Distributed Cache"
     project.addon.name = "Docker"

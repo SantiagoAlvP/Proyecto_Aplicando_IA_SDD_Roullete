@@ -47,18 +47,26 @@ class ProjectResponse(BaseModel):
     extras: list[Extras] = []
     level: int
     description: str
+    # HU-20: the fresh result already knows how to be shared.
+    share_token: str = Field(min_length=10, max_length=64)
 
 
 class HistoryEntry(BaseModel):
-    """One previously generated project, as shown in the history panel."""
+    """One previously generated project, as shown in the history panel.
+
+    HU-20 turned the history into a sharing surface, so every entry carries
+    its permanent public token. `level` is nullable for legacy rows.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    share_token: str = Field(min_length=10, max_length=64)
     programming_language: str
     technologies: str
     addons: str
     description: str
+    level: int | None = None
 
 
 class SharedProjectResponse(BaseModel):

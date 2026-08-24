@@ -46,6 +46,7 @@ def test_generate_by_value_with_extras(client_with_mocks):
         ],
         "level": 3,
         "description": "Build a REST API.",
+        "share_token": "v4lu3dtoken-share",
     }
 
     response = client.post(ENDPOINT, json=payload)

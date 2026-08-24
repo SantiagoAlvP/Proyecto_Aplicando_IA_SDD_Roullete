@@ -40,6 +40,7 @@ def test_generate_by_level_level_is_preserved(client_with_mocks):
             "extras": [],
             "level": lvl,
             "description": "desc",
+            "share_token": f"level{lvl}token-share",
         }
         body = client.post(ENDPOINT, json={"level": lvl}).json()
         assert body["level"] == lvl

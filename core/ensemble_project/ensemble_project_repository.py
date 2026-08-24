@@ -67,7 +67,13 @@ class EnsembleProjectRepository:
                 project_addon_id=extra_addon_id,
             )
 
-        return project
+        # The response must carry the persisted public identity (HU-20): the
+        # UI offers "Compartir" on the fresh result without a second request.
+        return {
+            **project,
+            "share_token": saved.share_token,
+            "level": saved.level if saved.level is not None else project.get("level"),
+        }
 
     def list_recent(self, limit: int) -> list[HistoryEntry]:
         """Return the latest projects as DTOs, never as ORM entities.
@@ -81,10 +87,12 @@ class EnsembleProjectRepository:
             entries.append(
                 HistoryEntry(
                     id=project.id or 0,
+                    share_token=project.share_token,
                     programming_language=_name_of(project.programming_language),
                     technologies=_name_of(project.tech),
                     addons=_name_of(project.addon),
                     description=project.description or "",
+                    level=project.level,
                 )
             )
         return entries

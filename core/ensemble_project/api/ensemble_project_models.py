@@ -61,6 +61,22 @@ class HistoryEntry(BaseModel):
     description: str
 
 
+class SharedProjectResponse(BaseModel):
+    """Full read-only view served to anyone holding a share link (HU-20).
+
+    `level` stays nullable: projects created before HU-20 never persisted it
+    and the view renders a neutral text instead of inventing a value.
+    """
+
+    share_token: str = Field(min_length=10, max_length=64)
+    programming_language: str
+    technologies: str
+    addons: str
+    extras: list[Extras] = []
+    level: int | None = None
+    description: str
+
+
 class ValidationResult(BaseModel):
     valid: bool = Field(description="Whether the tech stack is coherent and practical")
     reason: str = Field(

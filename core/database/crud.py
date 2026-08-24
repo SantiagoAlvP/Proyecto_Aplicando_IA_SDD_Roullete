@@ -92,12 +92,16 @@ class ProjectCRUD:
         description: Optional[str] = None,
         project_tech_id: Optional[int] = None,
         project_addon_id: Optional[int] = None,
+        level: Optional[int] = None,
     ) -> Project:
         project = Project(
             description=description,
             programming_language_id=programming_language_id,
             project_tech_id=cast(int, project_tech_id),
             project_addon_id=cast(int, project_addon_id),
+            # share_token and created_at are filled by model defaults so the
+            # public identity exists from the very first creation (HU-20).
+            level=level,
         )
         session.add(project)
         session.commit()
@@ -107,6 +111,13 @@ class ProjectCRUD:
     @staticmethod
     def get(session: Session, project_id: int) -> Optional[Project]:
         return session.get(Project, project_id)
+
+    @staticmethod
+    def get_by_share_token(session: Session, share_token: str) -> Optional[Project]:
+        """Exact lookup on the unique public token (HU-20); indexed in SQL."""
+        return session.exec(
+            select(Project).where(Project.share_token == share_token)
+        ).first()
 
     @staticmethod
     def get_all(session: Session) -> Sequence[Project]:

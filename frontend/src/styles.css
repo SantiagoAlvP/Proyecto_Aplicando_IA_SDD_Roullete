@@ -447,6 +447,55 @@ body {
   filter: brightness(1.08);
 }
 
+/* ── share button (HU-20, FR-005) ────────────────────────────────────────── */
+
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.history__item .share {
+  margin-top: 0.45rem;
+}
+
+.share__button {
+  border: 1px solid var(--border);
+  background: var(--bg-inset);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.share__button:hover,
+.share__button:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.share__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.share__fallback {
+  flex: 1 1 100%;
+  background: var(--bg-inset);
+  border: 1px dashed var(--accent);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+}
+
 /* ── responsive: usable down to 360px (spec 002, FR-007) ─────────────────── */
 
 @media (max-width: 900px) {

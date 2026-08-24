@@ -11,7 +11,19 @@ from core.ensemble_project.api.ensemble_project_validation import (
     get_or_create_id,
     optional_id,
 )
-from core.ensemble_project.api.ensemble_project_models import Entity, HistoryEntry
+from core.ensemble_project.api.ensemble_project_models import (
+    Entity,
+    Extras,
+    HistoryEntry,
+    SharedProjectResponse,
+)
+
+# Legacy rows may predate AI descriptions; an empty hole would look broken on
+# the public page (HU-20 edge case), so the shared view fills it with prose.
+FALLBACK_DESCRIPTION = (
+    "Este proyecto se generó antes de que la máquina escribiera "
+    "descripciones automáticas."
+)
 
 
 class EnsembleProjectRepository:
@@ -77,8 +89,38 @@ class EnsembleProjectRepository:
             )
         return entries
 
+    def get_by_share_token(self, share_token: str) -> SharedProjectResponse | None:
+        """Full read-only view for a share link, or None if it dangles (HU-20)."""
+        project = ProjectCRUD.get_by_share_token(self.session, share_token)
+        if project is None:
+            return None
+
+        extras = [
+            Extras(
+                programming_language=_optional_name_of(extra.programming_language),
+                technologies=_optional_name_of(extra.tech),
+                addons=_optional_name_of(extra.addon),
+            )
+            for extra in ProjectExtraCRUD.get_by_project(self.session, project.id or 0)
+        ]
+        return SharedProjectResponse(
+            share_token=project.share_token,
+            programming_language=_name_of(project.programming_language),
+            technologies=_name_of(project.tech),
+            addons=_name_of(project.addon),
+            extras=extras,
+            level=project.level,
+            description=project.description or FALLBACK_DESCRIPTION,
+        )
+
 
 def _name_of(entity: object) -> str:
     """A catalog row may be missing on legacy data; never return None."""
     name = getattr(entity, "name", None)
     return str(name) if name else "Unknown"
+
+
+def _optional_name_of(entity: object) -> str | None:
+    """Extras are optional per field: an absent relation stays null."""
+    name = getattr(entity, "name", None)
+    return str(name) if name else None

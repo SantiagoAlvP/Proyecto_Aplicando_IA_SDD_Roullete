@@ -18,10 +18,12 @@ ENDPOINT = "/api/v1/ensemble_project/history"
 def entry(entry_id: int) -> HistoryEntry:
     return HistoryEntry(
         id=entry_id,
+        share_token=f"token{entry_id}abcde",
         programming_language="Rust",
         technologies="Distributed Cache",
         addons="Docker",
         description=f"Project number {entry_id}.",
+        level=3 if entry_id % 2 == 0 else None,
     )
 
 
@@ -88,8 +90,37 @@ def test_entries_expose_the_expected_shape(client_and_service) -> None:
 
     assert set(body) == {
         "id",
+        "share_token",
         "programming_language",
         "technologies",
         "addons",
         "description",
+        "level",
     }
+
+
+def test_every_entry_carries_its_share_link_identity(client_and_service) -> None:
+    """HU-20: the history is a sharing surface, not just a list."""
+    client, service = client_and_service
+    service.get_history.return_value = [entry(2), entry(1)]
+
+    body = client.get(ENDPOINT).json()
+
+    assert [item["share_token"] for item in body] == [
+        "token2abcde",
+        "token1abcde",
+    ]
+    # Legacy rows never persisted a level; it must read as null, not 0.
+    assert [item["level"] for item in body] == [3, None]
+
+
+def test_generated_responses_carry_the_token_too(client_with_mocks) -> None:
+    """HU-20: 'Compartir' over a fresh result needs its token right away."""
+    client, *_ = client_with_mocks
+
+    response = client.post("/api/v1/ensemble_project/generate_project_totally_random")
+
+    assert response.status_code == 201
+    body = response.json()
+    assert isinstance(body["share_token"], str) and len(body["share_token"]) >= 10
+    assert body["level"] == 3

@@ -12,10 +12,20 @@ type LoadState =
   | { status: "ready"; project: SharedProjectData }
   | { status: "unavailable" };
 
+// Same contract the API enforces at its edge. A token failing this check can
+// only come from a mangled or manipulated link, so there is nothing to ask
+// the server: we answer with the friendly page straight away (HU-20, FR-008).
+const SHARE_TOKEN = /^[A-Za-z0-9_-]{10,64}$/;
+
 export function SharedProject({ token }: SharedProjectProps) {
   const [state, setState] = useState<LoadState>({ status: "loading" });
 
   useEffect(() => {
+    if (!SHARE_TOKEN.test(token)) {
+      setState({ status: "unavailable" });
+      return;
+    }
+
     let cancelled = false;
 
     setState({ status: "loading" });
@@ -25,6 +35,8 @@ export function SharedProject({ token }: SharedProjectProps) {
         if (!cancelled) setState({ status: "ready", project });
       })
       .catch(() => {
+        // 404 or network failure read exactly the same to a visitor; neither
+        // may surface technical detail (US3).
         if (!cancelled) setState({ status: "unavailable" });
       });
 

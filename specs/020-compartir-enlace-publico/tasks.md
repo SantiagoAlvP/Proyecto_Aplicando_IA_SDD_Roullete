@@ -14,7 +14,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Verificar la línea base en verde antes de tocar código: `uv run pytest -q`, `uv run ruff check`, `uv run ruff format --check`, `uv run ty check`
+- [X] T001 Verificar la línea base en verde antes de tocar código: `uv run pytest -q`, `uv run ruff check`, `uv run ruff format --check`, `uv run ty check`
 
 ---
 
@@ -22,10 +22,10 @@
 
 **⚠️ CRITICAL**: ninguna historia empieza hasta completar esta fase.
 
-- [ ] T002 Escribir tests Rojo de esquema: proyecto nuevo persiste `share_token` único, `level` y `created_at`; `get_by_share_token` lo recupera → `tests/test_database/test_crud.py`
-- [ ] T003 Añadir columnas `share_token` (única, indexada), `level` (anulable) y `created_at` al modelo `Project` → `core/database/models.py`
-- [ ] T004 Crear migración Alembic que añade las tres columnas y hace backfill de `share_token` con `secrets.token_urlsafe(12)` para filas previas (FR-007); niveles legados quedan `NULL` → `alembic/versions/`
-- [ ] T005 Extender `ProjectCRUD.create` para generar token y persistir nivel, y añadir `get_by_share_token`; hacer pasar los tests de T002 → `core/database/crud.py`
+- [X] T002 Escribir tests Rojo de esquema: proyecto nuevo persiste `share_token` único, `level` y `created_at`; `get_by_share_token` lo recupera → `tests/test_database/test_crud.py`
+- [X] T003 Añadir columnas `share_token` (única, indexada), `level` (anulable) y `created_at` al modelo `Project` → `core/database/models.py`
+- [X] T004 Crear migración Alembic que añade las tres columnas y hace backfill de `share_token` con `secrets.token_urlsafe(12)` para filas previas (FR-007); niveles legados quedan `NULL` → `alembic/versions/`
+- [X] T005 Extender `ProjectCRUD.create` para generar token y persistir nivel, y añadir `get_by_share_token`; hacer pasar los tests de T002 → `core/database/crud.py`
 
 **Checkpoint**: `docker compose up api postgres` aplica la migración al arrancar; todo proyecto, antiguo o nuevo, tiene token.
 
@@ -39,17 +39,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T006 `[P]` `[US1]` Tests Rojo del contrato: `GET shared/{token}` devuelve 200 con forma completa, 404 con mensaje neutro para token inexistente, 422 para token fuera de cotas, y nunca filtra detalles internos → `tests/test_fastapi_endpoints/test_shared_project.py`
+- [X] T006 `[P]` `[US1]` Tests Rojo del contrato: `GET shared/{token}` devuelve 200 con forma completa, 404 con mensaje neutro para token inexistente, 422 para token fuera de cotas, y nunca filtra detalles internos → `tests/test_fastapi_endpoints/test_shared_project.py`
 
 ### Implementation for User Story 1
 
-- [ ] T007 `[US1]` Definir DTO `SharedProjectResponse` (share_token, combinación, extras, level anulable, description con relleno legible) → `core/ensemble_project/api/ensemble_project_models.py`
-- [ ] T008 `[US1]` Añadir `get_by_share_token` al repositorio: carga proyecto + catálogos + extras y lo mapea a DTO (patrón `_name_of` para legados) → `core/ensemble_project/ensemble_project_repository.py`
-- [ ] T009 `[US1]` Implementar `get_shared_project(token)` en el servicio con excepción de dominio para "no encontrado" → `core/ensemble_project/ensemble_project_service.py`
-- [ ] T010 `[US1]` Exponer `GET /ensemble_project/shared/{share_token}` con path param acotado (`min_length=10, max_length=64`, patrón `^[A-Za-z0-9_-]+$`) y traducción del error de dominio a 404 neutro; hacer pasar T006 → `core/ensemble_project/api/ensemble_project_router.py`
-- [ ] T011 `[P]` `[US1]` Definir tipo `SharedProject` espejo y cliente `api.sharedProject(token)` → `frontend/src/types.ts`, `frontend/src/api.ts`
-- [ ] T012 `[US1]` Crear la vista pública de solo lectura: combinación completa, nivel (texto neutral si es `null`), extras, descripción con contenedor con scroll y CTA "crea el tuyo" hacia `/` (FR-002, FR-003, FR-009) → `frontend/src/components/SharedProject.tsx`
-- [ ] T013 `[US1]` Detectar `pathname` `/proyecto/{token}` en el arranque y renderizar la vista pública sin añadir librería de routing (D-03) → `frontend/src/App.tsx`
+- [X] T007 `[US1]` Definir DTO `SharedProjectResponse` (share_token, combinación, extras, level anulable, description con relleno legible) → `core/ensemble_project/api/ensemble_project_models.py`
+- [X] T008 `[US1]` Añadir `get_by_share_token` al repositorio: carga proyecto + catálogos + extras y lo mapea a DTO (patrón `_name_of` para legados) → `core/ensemble_project/ensemble_project_repository.py`
+- [X] T009 `[US1]` Implementar `get_shared_project(token)` en el servicio con excepción de dominio para "no encontrado" → `core/ensemble_project/ensemble_project_service.py`
+- [X] T010 `[US1]` Exponer `GET /ensemble_project/shared/{share_token}` con path param acotado (`min_length=10, max_length=64`, patrón `^[A-Za-z0-9_-]+$`) y traducción del error de dominio a 404 neutro; hacer pasar T006 → `core/ensemble_project/api/ensemble_project_router.py`
+- [X] T011 `[P]` `[US1]` Definir tipo `SharedProject` espejo y cliente `api.sharedProject(token)` → `frontend/src/types.ts`, `frontend/src/api.ts`
+- [X] T012 `[US1]` Crear la vista pública de solo lectura: combinación completa, nivel (texto neutral si es `null`), extras, descripción con contenedor con scroll y CTA "crea el tuyo" hacia `/` (FR-002, FR-003, FR-009) → `frontend/src/components/SharedProject.tsx`
+- [X] T013 `[US1]` Detectar `pathname` `/proyecto/{token}` en el arranque y renderizar la vista pública sin añadir librería de routing (D-03) → `frontend/src/App.tsx`
 
 **Checkpoint**: un enlace válido funciona de punta a punta sin haber tocado ResultCard ni History.
 
@@ -63,14 +63,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 `[P]` `[US2]` Tests Rojo: cada entrada de `GET /history` y cada respuesta `POST /generate_*` incluye `share_token` (y `level`) → `tests/test_fastapi_endpoints/test_history.py`
+- [X] T014 `[P]` `[US2]` Tests Rojo: cada entrada de `GET /history` y cada respuesta `POST /generate_*` incluye `share_token` (y `level`) → `tests/test_fastapi_endpoints/test_history.py`
 
 ### Implementation for User Story 2
 
-- [ ] T015 `[US2]` Ampliar `HistoryEntry` y `ProjectResponse` con `share_token` (+`level` anulable) y poblarlos desde el repositorio (`list_recent`, `save_project`); hacer pasar T014 → `core/ensemble_project/api/ensemble_project_models.py`, `core/ensemble_project/ensemble_project_repository.py`
-- [ ] T016 `[P]` `[US2]` Componente `ShareButton`: construye `{origin}/proyecto/{token}`, copia con `navigator.clipboard`, segundo intento vía `textarea` + `execCommand`, confirmación visual breve; nunca muestra error crudo (FR-005, D-06) → `frontend/src/components/ShareButton.tsx`
-- [ ] T017 `[US2]` Integrar `ShareButton` en la tarjeta de resultado y en cada entrada del historial (FR-004) → `frontend/src/components/ResultCard.tsx`, `frontend/src/components/History.tsx`
-- [ ] T018 `[US2]` Estilos del botón y de la confirmación, coherentes con el tema actual → `frontend/src/styles.css`
+- [X] T015 `[US2]` Ampliar `HistoryEntry` y `ProjectResponse` con `share_token` (+`level` anulable) y poblarlos desde el repositorio (`list_recent`, `save_project`); hacer pasar T014 → `core/ensemble_project/api/ensemble_project_models.py`, `core/ensemble_project/ensemble_project_repository.py`
+- [X] T016 `[P]` `[US2]` Componente `ShareButton`: construye `{origin}/proyecto/{token}`, copia con `navigator.clipboard`, segundo intento vía `textarea` + `execCommand`, confirmación visual breve; nunca muestra error crudo (FR-005, D-06) → `frontend/src/components/ShareButton.tsx`
+- [X] T017 `[US2]` Integrar `ShareButton` en la tarjeta de resultado y en cada entrada del historial (FR-004) → `frontend/src/components/ResultCard.tsx`, `frontend/src/components/History.tsx`
+- [X] T018 `[US2]` Estilos del botón y de la confirmación, coherentes con el tema actual → `frontend/src/styles.css`
 
 **Checkpoint**: emitir un enlace toma dos interacciones o menos (SC-002).
 
@@ -84,8 +84,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 `[US3]` Estado "no disponible" dentro de la vista pública: cubre 404 del API, fallo de red y token con formato inválido detectado en cliente (sin llamar al API), siempre con CTA hacia `/` (FR-008) → `frontend/src/components/SharedProject.tsx`
-- [ ] T020 `[US3]` Recorrer los escenarios negativos del quickstart (§3) y verificar que ninguna respuesta filtra stack trace, rutas ni nombres de tablas → `specs/020-compartir-enlace-publico/quickstart.md`
+- [X] T019 `[US3]` Estado "no disponible" dentro de la vista pública: cubre 404 del API, fallo de red y token con formato inválido detectado en cliente (sin llamar al API), siempre con CTA hacia `/` (FR-008) → `frontend/src/components/SharedProject.tsx`
+- [X] T020 `[US3]` Recorrer los escenarios negativos del quickstart (§3) y verificar que ninguna respuesta filtra stack trace, rutas ni nombres de tablas → `specs/020-compartir-enlace-publico/quickstart.md`
 
 **Checkpoint**: las tres historias funcionan de forma independiente.
 
@@ -93,8 +93,8 @@
 
 ## Phase 6: Polish & Cross-Cutting
 
-- [ ] T021 `[P]` Revisión responsive a 360 px de la vista pública y del botón compartir (edge case móvil, SC/FR-010) → `frontend/src/styles.css`
-- [ ] T022 Ejecutar la validación completa del quickstart y las puertas de calidad: `uv run pytest -q && uv run ruff check && uv run ruff format --check && uv run ty check` y `cd frontend && npm run build`
+- [X] T021 `[P]` Revisión responsive a 360 px de la vista pública y del botón compartir (edge case móvil, SC/FR-010) → `frontend/src/styles.css`
+- [X] T022 Ejecutar la validación completa del quickstart y las puertas de calidad: `uv run pytest -q && uv run ruff check && uv run ruff format --check && uv run ty check` y `cd frontend && npm run build`
 
 ---
 

@@ -51,6 +51,12 @@ class AIProjectAdvisor:
         self._settings = settings or AppSettings()
         self._fallback = StubGateway()
 
+    @property
+    def _active_gateway(self) -> AIGateway:
+        if self._settings.ai_generation_enabled:
+            return self._gateway
+        return self._fallback
+
     # ── selection ────────────────────────────────────────────────────────────
     async def choose_valid_project(self, projects: list[dict]) -> ProjectSelection:
         if not projects:
@@ -72,7 +78,7 @@ class AIProjectAdvisor:
         )
 
         try:
-            raw = await self._gateway.generate(prompt)
+            raw = await self._active_gateway.generate(prompt)
             selection = self._parse_selection(raw, len(projects))
         except Exception:  # noqa: BLE001 - degraded mode is a product requirement
             logger.exception(
@@ -143,7 +149,7 @@ class AIProjectAdvisor:
         )
 
         try:
-            text = await self._gateway.generate(prompt)
+            text = await self._active_gateway.generate(prompt)
         except Exception:  # noqa: BLE001 - degraded mode is a product requirement
             logger.exception("AI description failed; using the deterministic fallback.")
             text = await self._fallback.generate(prompt)

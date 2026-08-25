@@ -73,6 +73,11 @@ class AppSettings(BaseSettings):
     MAX_DESCRIPTION_LENGTH: int = 500
     HISTORY_MAX_LIMIT: int = 50
 
+    # ── AI GENERATION TOGGLE ─────────────────────────────────────────────────
+    # When false, every generation call uses the deterministic stub instead of
+    # the configured provider, protecting the free-tier quota from abuse.
+    AI_GENERATION_ENABLED: bool = True
+
     # ── AI GATEWAY ───────────────────────────────────────────────────────────
     # "auto" resolves to groq when GROQ_API_KEY is present, and to the
     # deterministic stub otherwise, so the app never fails to boot because an
@@ -99,6 +104,10 @@ class AppSettings(BaseSettings):
     OLLAMA_HOST: str = "http://localhost:11434"
 
     # ── DERIVED VALUES ───────────────────────────────────────────────────────
+    @property
+    def ai_generation_enabled(self) -> bool:
+        return self.AI_GENERATION_ENABLED
+
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"

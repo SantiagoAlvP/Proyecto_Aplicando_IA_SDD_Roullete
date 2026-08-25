@@ -49,6 +49,7 @@ async def diagnostics(
             "api_key_present": bool(settings.GROQ_API_KEY),
             "api_key_length": len(settings.GROQ_API_KEY or ""),
             "degraded": provider == "stub",
+            "ai_generation_enabled": settings.ai_generation_enabled,
         },
         "database": {
             "using_platform_url": bool(settings.DATABASE_URL),

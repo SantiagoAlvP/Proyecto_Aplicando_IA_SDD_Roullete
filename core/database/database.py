@@ -3,6 +3,9 @@ import logging
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from typing import Any
+
+from sqlalchemy import text
 from sqlmodel import Session, SQLModel, create_engine
 
 from core.settings.default import AppSettings
@@ -85,6 +88,22 @@ def init_db() -> None:
 
     create_tables()
     seed_lookup_tables()
+
+
+def check_db_connectivity(db_engine: Any) -> bool:
+    """Return True if the database responds to a lightweight SELECT 1.
+
+    The engine is typed as ``object`` so callers can inject any SQLAlchemy
+    engine (or a mock in tests) without importing the internal type.
+    A 5-second timeout prevents blocking the hosting platform (FR-005).
+    """
+    try:
+        with db_engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        logger.warning("Database connectivity check failed", exc_info=True)
+        return False
 
 
 def get_db():

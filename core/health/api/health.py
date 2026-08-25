@@ -9,8 +9,11 @@ external provider, or on anything that can be slow.
 configuration, never secrets - the API key is reduced to a boolean.
 """
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, Request
 
+from core.database.database import check_db_connectivity, engine
 from core.settings.default import AppSettings
 
 router = APIRouter(prefix="/health", tags=["health"])
@@ -20,16 +23,30 @@ def get_settings(request: Request) -> AppSettings:
     return request.app.state.settings
 
 
+def get_engine() -> Any:
+    return engine
+
+
+def _db_status(settings: AppSettings, db_engine: Any) -> dict[str, bool]:
+    configured = bool(settings.DATABASE_URL)
+    connected = check_db_connectivity(db_engine) if configured else False
+    return {"connected": connected, "configured": configured}
+
+
 @router.get("", include_in_schema=False)
 @router.get("/")
-async def health() -> dict[str, str]:
-    return {"status": "healthy"}
+async def health(
+    settings: AppSettings = Depends(get_settings),
+    db_engine: Any = Depends(get_engine),
+) -> dict[str, Any]:
+    return {"status": "healthy", "database": _db_status(settings, db_engine)}
 
 
 @router.get("/diagnostics")
 async def diagnostics(
     settings: AppSettings = Depends(get_settings),
-) -> dict[str, object]:
+    db_engine: Any = Depends(get_engine),
+) -> dict[str, Any]:
     """Effective runtime configuration, with every secret redacted.
 
     `ai_provider` is the *resolved* provider, so "stub" here means the instance
@@ -53,6 +70,7 @@ async def diagnostics(
         },
         "database": {
             "using_platform_url": bool(settings.DATABASE_URL),
+            **_db_status(settings, db_engine),
         },
         "security": {
             "rate_limit_enabled": settings.RATE_LIMIT_ENABLED,

@@ -10,12 +10,18 @@ def test_health():
     response = client.get("/api/health/")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy"}
+    body = response.json()
+    assert body["status"] == "healthy"
+    assert "database" in body
+    assert "connected" in body["database"]
+    assert "configured" in body["database"]
 
 
 def test_health_contract_is_stable_without_trailing_slash():
     """The platform polls this exact path as its liveness probe."""
-    assert client.get("/api/health").json() == {"status": "healthy"}
+    body = client.get("/api/health").json()
+    assert body["status"] == "healthy"
+    assert "database" in body
 
 
 # ── diagnostics ──────────────────────────────────────────────────────────────

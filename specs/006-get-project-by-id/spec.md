@@ -111,8 +111,8 @@ Seguridad y privacidad
 
 Notas y siguientes pasos
 
-- Confirmar la política de autorización indicada en la [NEEDS CLARIFICATION: Autorización y visibilidad].
-- Una vez confirmada, proceder a `/speckit-plan` para definir tareas, y luego `/speckit-tasks` para convertirlas en tickets ejecutables.
+- Política de autorización confirmada en la sección Clarifications (2026-08-28): híbrido público/privado con 401/403 según corresponda.
+- Con la spec sin huecos, proceder a `/speckit-plan` para definir tareas, y luego `/speckit-tasks` para convertirlas en tickets ejecutables.
 
 ---
 

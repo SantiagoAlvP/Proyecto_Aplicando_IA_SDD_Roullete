@@ -25,7 +25,9 @@ Validation steps
 
 5. Request with invalid id format:
    - curl -sS "http://localhost:9600/api/v1/projects/invalid-id" -v
-   - Expect HTTP 400
+   - Expect HTTP 422 (project_id is an integer path param; FastAPI validates
+     it automatically. See contracts/project_contract.md for why this isn't
+     400 as originally drafted.)
 
 Notes
 

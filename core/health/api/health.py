@@ -11,6 +11,7 @@ configuration, never secrets - the API key is reduced to a boolean.
 
 from fastapi import APIRouter, Depends, Request
 
+from core.monitoring.metrics import get_metrics_snapshot
 from core.settings.default import AppSettings
 
 router = APIRouter(prefix="/health", tags=["health"])
@@ -59,3 +60,14 @@ async def diagnostics(
             "cors_origins": settings.cors_origins,
         },
     }
+
+
+@router.get("/metrics")
+async def metrics() -> dict[str, object]:
+    """In-process counters for endpoint usage.
+
+    Lightweight telemetry (see core/monitoring/metrics.py): no external
+    dependency, resets on restart. Useful for a quick operational check,
+    not a replacement for a real metrics backend at scale.
+    """
+    return {"counters": get_metrics_snapshot()}

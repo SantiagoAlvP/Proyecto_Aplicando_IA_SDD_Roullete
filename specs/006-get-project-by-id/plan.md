@@ -2,20 +2,20 @@
 
 Technical context
 
-- This feature exposes a read-only resource "Project" identified by UUID. The API surface will follow the repository's /api/v1 prefix and be reachable at GET /api/v1/projects/{project_id}.
+- This feature exposes a read-only resource "Project" identified by the database integer primary key (id). The API surface will follow the repository's /api/v1 prefix and be reachable at GET /api/v1/projects/{project_id}.
 - Existing code contains a catalog module (core/catalog) housing repository and service responsibilities; routers for catalog live under /catalog. To keep resources discoverable and avoid mixing concerns, a dedicated projects router will be added under core/projects/api/projects_router.py and registered in core/routers.py.
 - Authorization: projects with is_public=true are accessible without auth; is_public=false requires authentication and authorization (owner or permission 'ver_proyecto'). Auth logic will live in core/security/auth.py and be invoked by the service layer (service raises domain exceptions) or by a small helper dependency injected into the endpoint.
 
 Architecture & key decisions
 
 - Router: create core/projects/api/projects_router.py with APIRouter(prefix='/projects', tags=['projects']). Register via core/routers.configure_routers alongside existing catalog router.
-- Repository/Service: reuse core/catalog/catalog_repository.py and core/catalog/catalog_service.py if they already implement Project operations; otherwise extend them with get_by_id. Repository signature: get_by_id(db_session, project_id: UUID) -> Optional[ProjectModel]. Service returns DTOs; it performs business authorization checks by calling auth helpers or raising domain exceptions.
+- Repository/Service: reuse core/catalog/catalog_repository.py and core/catalog/catalog_service.py if they already implement Project operations; otherwise extend them with get_by_id. Repository signature: get_by_id(db_session, project_id: int) -> Optional[ProjectModel]. Service returns DTOs; it performs business authorization checks by calling auth helpers or raising domain exceptions.
 - Auth module: create core/security/auth.py implementing token->user resolution and permission check helpers: is_owner(user, project) and has_permission(user, 'ver_proyecto'). Service uses these helpers; routers translate domain exceptions into HTTP 401/403 via existing core.security.errors handlers.
-- Validation: enforce project_id is a UUID. Use existing validation utilities or add core/utils/validation.py with is_valid_uuid(). Return 400 on invalid format.
+- Validation: enforce project_id is an integer (DB primary key). FastAPI's path-parameter typing validates the type and returns 422 for invalid values, so a custom UUID validator is not required. Document this behavior in the contract and tests.
 
 Data & migrations
 
-- Data-model: assume Project model exists in core/database/models or equivalent. Ensure fields: id (UUID), name, description, slug (nullable), owner_id, owner_name, is_public (boolean), tags, metadata, created_at, updated_at.
+- Data-model: assume Project model exists in core/database/models or equivalent. Ensure fields: id (integer autoincrement primary key), name, description, slug (nullable), owner_id, owner_name, is_public (boolean), tags, metadata, created_at, updated_at.
 - If is_public column missing, add migration (alembic) and seed data update. Migration tasks belong to implementation phase only if necessary.
 
 Testing strategy
@@ -34,7 +34,7 @@ Complexity tracking
 
 Phases & mapping to tasks
 
-- Phase 1 (Foundational): Add UUID validation helper, ensure Project model fields (is_public), add DB seed entries.
+- Phase 1 (Foundational): Ensure Project model fields (is_public) are present, and confirm path-param validation relies on FastAPI typing (no custom UUID helper). Add DB seed entries if needed for integration tests.
 - Phase 2 (Implementation): Repository method get_by_id, service method get_project_by_id, auth helpers, router endpoint GET /api/v1/projects/{project_id}.
 - Phase 3 (Tests & polish): Unit tests, integration tests, contract update, logging, telemetry.
 

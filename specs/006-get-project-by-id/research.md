@@ -6,10 +6,10 @@ Alternatives considered:
 - Public-only: Simplest but risks exposing private data.
 - Owner-only: Strong privacy but may be too restrictive for shared/private teams.
 
-Decision: Identifier format = UUID
-Rationale: UUIDs avoid guessing and are consistent with other services in the repository. If the system uses integer ids, convert validation rules accordingly.
+Decision: Identifier format = integer (existing DB primary key)
+Rationale: The current system and Project model use an integer autoincrement primary key. To avoid breaking changes and extra migration risk, the spec adopts the existing integer id as canonical for the API. If a migration to UUIDs is desired in the future, it must be planned explicitly with a backfill strategy.
 Alternatives considered:
-- Integer IDs: simpler but can be enumerable and expose data by sequential ids.
+- UUIDs: avoid guessability but require schema migration, backfill, and broader code changes.
 
 Decision: Contract path = /api/v1/projects/{project_id}
 Rationale: Consistent with existing router structure that mounts under /api/v1.

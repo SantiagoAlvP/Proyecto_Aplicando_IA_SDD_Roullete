@@ -17,7 +17,7 @@ Contexto y alcance
 
 - Esta funcionalidad permite recuperar un único recurso "Proyecto" (read-only) por su identificador.
 - No incluye creación, edición ni eliminación de proyectos.
-- Se espera que el identificador sea único y estable (UUID o id numérico); el formato exacto se asumirá salvo que se indique lo contrario en las aclaraciones.
+- Se espera que el identificador sea único y estable (id entero autoincremental). Por ahora la API acepta un entero como identificador. Si en el futuro se migra a UUID, la especificación deberá actualizarse y planificarse la migración.
 
 ## Clarifications
 
@@ -41,7 +41,7 @@ Escenario B — Proyecto no encontrado
 Escenario C — Identificador inválido
 - Dado un identificador con formato inválido
 - Cuando el cliente hace la petición
-- Entonces la API responde con estado 400 Bad Request con un mensaje de error claro.
+- Entonces la API responde con estado 422 Unprocessable Entity (invalid path parameter type) con un mensaje de error claro.
 
 Escenario D — Acceso denegado (si aplica)
 - Dado que el proyecto existe pero el cliente no tiene permisos para verlo
@@ -57,7 +57,7 @@ Requisitos funcionales (testables)
    - Dado un identificador cuyo proyecto no existe, el endpoint devuelve 404.
 
 3. RF-03 — Validación de formato
-   - Si el identificador tiene un formato inválido, el endpoint devuelve 400 con un mensaje que indica el problema.
+   - Si el identificador tiene un formato inválido, el endpoint devuelve 422 Unprocessable Entity (FastAPI path-param validation) con un mensaje que indica el problema.
 
 4. RF-04 — Control de acceso
    - Si el proyecto tiene is_public == False, el endpoint requiere autenticación; solo usuarios autorizados (propietario o con permiso 'ver_proyecto' en un modelo de roles) pueden ver el recurso. Responder 401 para clientes no autenticados y 403 para clientes autenticados pero sin permiso. No exponer campos sensibles a usuarios no autorizados.
@@ -68,12 +68,12 @@ Requisitos funcionales (testables)
 Entidades clave
 
 - Proyecto
-  - id (string/UUID o entero)
+  - id (integer)
   - nombre (string)
   - descripción (string)
   - slug (string, opcional)
-  - owner_id (string)
-  - owner_name (string)
+  - owner_id (integer | null)
+  - owner_name (string | null)
   - created_at (timestamp)
   - updated_at (timestamp)
   - is_public (bool)
@@ -111,8 +111,8 @@ Seguridad y privacidad
 
 Notas y siguientes pasos
 
-- Política de autorización confirmada en la sección Clarifications (2026-08-28): híbrido público/privado con 401/403 según corresponda.
-- Con la spec sin huecos, proceder a `/speckit-plan` para definir tareas, y luego `/speckit-tasks` para convertirlas en tickets ejecutables.
+- Confirmar la política de autorización indicada en la [NEEDS CLARIFICATION: Autorización y visibilidad].
+- Una vez confirmada, proceder a `/speckit-plan` para definir tareas, y luego `/speckit-tasks` para convertirlas en tickets ejecutables.
 
 ---
 

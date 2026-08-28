@@ -67,6 +67,11 @@ class Project(SQLModel, table=True):
     project_tech_id: int = Field(default=None, foreign_key="project_techs.id")
     project_addon_id: int = Field(default=None, foreign_key="project_addons.id")
 
+    # New fields for ownership and visibility
+    owner_id: Optional[int] = Field(default=None)
+    owner_name: Optional[str] = Field(default=None, max_length=200)
+    is_public: bool = Field(default=True)
+
     programming_language: Optional[ProjectProgrammingLanguage] = Relationship(
         back_populates="projects"
     )

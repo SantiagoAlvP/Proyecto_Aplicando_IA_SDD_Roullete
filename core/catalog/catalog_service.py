@@ -23,6 +23,9 @@ class CatalogService(ABC):
     @abstractmethod
     def get_random_addon(self) -> dict | None: ...
 
+    @abstractmethod
+    def get_project_by_id(self, project_id: int): ...
+
 
 class DefaultCatalogService(CatalogService):
     def __init__(self, repo: CatalogRepository):
@@ -48,3 +51,7 @@ class DefaultCatalogService(CatalogService):
     def get_random_addon(self) -> dict | None:
         result = self.repo.get_random_addon()
         return {"addon": result} if result else None
+
+    def get_project_by_id(self, project_id: int):
+        """Return the Project model instance or None if not found."""
+        return self.repo.get_project_by_id(project_id)

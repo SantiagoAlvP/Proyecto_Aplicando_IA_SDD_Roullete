@@ -29,3 +29,12 @@ class CatalogRepository:
     def get_random_addon(self) -> ProjectAddon | None:
         addons = list(AddonCRUD.get_all(self.session))
         return random.choice(addons) if addons else None
+
+    def get_project_by_id(self, project_id: int):
+        """Return a Project by its primary key or None if missing."""
+        from core.database.models import Project
+
+        try:
+            return self.session.get(Project, project_id)
+        except Exception:
+            return None

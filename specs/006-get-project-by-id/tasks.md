@@ -17,7 +17,7 @@ Phase 3 — US1: Get project by id (P1)
 - [x] T100 [US1] Implement Project repository method: get_by_id(project_id: UUID) -> Project | None (core/catalog/repository.py)
 - [x] T101 [US1] Implement service method: get_project_by_id(project_id: UUID, user: Optional[User]) -> ProjectDTO (core/catalog/service.py)
 - [x] T102 [US1] Implement endpoint: GET /api/v1/projects/{project_id} -> uses service, returns Project contract (core/projects/api/projects_router.py)
-- [ ] T103 [US1] Implement authorization checks in service or middleware to enforce is_public and permissions (core/security/auth.py)
+- [x] T103 [US1] Implement authorization checks in service or middleware to enforce is_public and permissions (core/security/auth.py)
 - [x] T104 [US1] Write unit tests for repository, service, and endpoint (tests/unit/test_catalog_project.py)
 - [ ] T105 [US1] Add integration tests for quickstart scenarios (tests/integration/test_get_project_by_id.py)  
 

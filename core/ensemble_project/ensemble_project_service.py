@@ -38,6 +38,10 @@ class ProjectAIAdvisor(Protocol):
     async def generate_description(self, project: dict) -> str: ...
 
 
+class CatalogItem(Protocol):
+    name: str
+
+
 class ProjectGeneratorService:
     def __init__(
         self,
@@ -118,29 +122,39 @@ class ProjectGeneratorService:
     async def generate_by_value(
         self, payload: GenerateProjectByValueRequest
     ) -> ProjectResponse:
+        excluded = self._normalize_excluded(payload.excluded)
         programming_language = payload.programming_language
         if not programming_language or programming_language == "string":
-            lang = self.catalog_repo.get_random_programming_language()
+            lang = self._pick_random_programming_language(excluded)
             if lang is None:
                 raise ValueError(
                     "Catalog is empty: cannot pick a random programming language."
                 )
             programming_language = lang.name
+        elif self._is_excluded(programming_language, excluded):
+            lang = self._pick_random_programming_language(excluded)
+            if lang is None:
+                raise ValueError("No programming languages remain after exclusions.")
+            programming_language = lang.name
 
         technologies = payload.technologies
         if not technologies or technologies == "string":
-            tech = self.catalog_repo.get_random_technology()
+            tech = self._pick_random_technology(excluded)
             if tech is None:
                 raise ValueError("Catalog is empty: cannot pick a random technology.")
+            technologies = tech.name
+        elif self._is_excluded(technologies, excluded):
+            tech = self._pick_random_technology(excluded)
+            if tech is None:
+                raise ValueError("No technologies remain after exclusions.")
             technologies = tech.name
 
         addons = payload.addons
         if not addons or addons == "string":
-            addon = self.catalog_repo.get_random_addon()
+            addon = self._pick_random_addon()
             if addon is None:
                 raise ValueError("Catalog is empty: cannot pick a random addon.")
             addons = addon.name
-
         level = (
             payload.level.level if isinstance(payload.level, Level) else payload.level
         )
@@ -148,10 +162,12 @@ class ProjectGeneratorService:
             level = randint(1, 5)
 
         extra_count = level * 2
-        filled_extras = [self._fill_extra(e) for e in (payload.extras or [])]
+        filled_extras = [self._fill_extra(e, excluded) for e in (payload.extras or [])]
 
         if len(filled_extras) < extra_count:
-            filled_extras += self._pick_random_extras(extra_count - len(filled_extras))
+            filled_extras += self._pick_random_extras(
+                extra_count - len(filled_extras), excluded
+            )
         elif len(filled_extras) > extra_count:
             filled_extras = filled_extras[:extra_count]
 
@@ -174,18 +190,25 @@ class ProjectGeneratorService:
         return ProjectResponse(**saved)
 
     async def generate_by_level(self, payload: Level) -> ProjectResponse:
-        return await self._build_best_project(payload.level)
+        excluded = self._normalize_excluded(getattr(payload, "excluded", []))
+        return await self._build_best_project(payload.level, excluded)
 
     async def generate_random(self) -> ProjectResponse:
-        return await self._build_best_project(randint(1, 5))
+        return await self._build_best_project(randint(1, 5), set())
 
-    async def _build_best_project(self, level: int) -> ProjectResponse:
+    async def _build_best_project(
+        self, level: int, excluded: set[str] | None = None
+    ) -> ProjectResponse:
         settings = AppSettings()
+        excluded = excluded or set()
 
         candidates = [
             {
-                **self._pick_random_base(level),
-                "extras": [e.model_dump() for e in self._pick_random_extras(level * 2)],
+                **self._pick_random_base(level, excluded),
+                "extras": [
+                    e.model_dump()
+                    for e in self._pick_random_extras(level * 2, excluded)
+                ],
             }
             for _ in range(settings.CANDIDATES)
         ]
@@ -204,12 +227,13 @@ class ProjectGeneratorService:
         saved = self.project_repo.save_project(best)
         return ProjectResponse(**saved)
 
-    def _pick_random_base(self, level: int) -> dict:
-        lang = self.catalog_repo.get_random_programming_language()
-        tech = self.catalog_repo.get_random_technology()
-        addon = self.catalog_repo.get_random_addon()
+    def _pick_random_base(self, level: int, excluded: set[str] | None = None) -> dict:
+        excluded = excluded or set()
+        lang = self._pick_random_programming_language(excluded)
+        tech = self._pick_random_technology(excluded)
+        addon = self._pick_random_addon()
         if lang is None or tech is None or addon is None:
-            raise ValueError("Catalog is empty: cannot pick a random project base.")
+            raise ValueError("No eligible catalog values remain after exclusions.")
         return {
             "programming_language": lang.name,
             "technologies": tech.name,
@@ -217,7 +241,62 @@ class ProjectGeneratorService:
             "level": level,
         }
 
-    def _pick_random_extras(self, times: int) -> list[Extras]:
+    def _pick_random_programming_language(
+        self, excluded: set[str] | None = None
+    ) -> CatalogItem | None:
+        excluded = excluded or set()
+        values = self.catalog_repo.get_programming_languages()
+        if isinstance(values, list):
+            allowed = [
+                item
+                for item in values
+                if item is not None
+                and str(getattr(item, "name", "")).strip().lower() not in excluded
+            ]
+            if allowed:
+                return random.choice(allowed)
+
+        fallback = self.catalog_repo.get_random_programming_language()
+        if (
+            fallback is not None
+            and str(getattr(fallback, "name", "")).strip().lower() not in excluded
+        ):
+            return fallback
+        return None
+
+    def _pick_random_technology(
+        self, excluded: set[str] | None = None
+    ) -> CatalogItem | None:
+        excluded = excluded or set()
+        values = self.catalog_repo.get_technologies()
+        if isinstance(values, list):
+            allowed = [
+                item
+                for item in values
+                if item is not None
+                and str(getattr(item, "name", "")).strip().lower() not in excluded
+            ]
+            if allowed:
+                return random.choice(allowed)
+
+        fallback = self.catalog_repo.get_random_technology()
+        if (
+            fallback is not None
+            and str(getattr(fallback, "name", "")).strip().lower() not in excluded
+        ):
+            return fallback
+        return None
+
+    def _pick_random_addon(self) -> CatalogItem | None:
+        values = self.catalog_repo.get_addons()
+        if isinstance(values, list):
+            return random.choice(values) if values else None
+        return self.catalog_repo.get_random_addon()
+
+    def _pick_random_extras(
+        self, times: int, excluded: set[str] | None = None
+    ) -> list[Extras]:
+        excluded = excluded or set()
         fields = ["programming_language", "techs", "addons"]
         result = []
         remaining = times
@@ -228,21 +307,21 @@ class ProjectGeneratorService:
 
             lang_name = None
             if "programming_language" in selected:
-                lang_name = NamedCatalogEntry.model_validate(
-                    self.catalog_repo.get_random_programming_language()
-                ).name
+                lang = self._pick_random_programming_language(excluded)
+                if lang is not None:
+                    lang_name = NamedCatalogEntry.model_validate(lang).name
 
             tech_name = None
             if "techs" in selected:
-                tech_name = NamedCatalogEntry.model_validate(
-                    self.catalog_repo.get_random_technology()
-                ).name
+                tech = self._pick_random_technology(excluded)
+                if tech is not None:
+                    tech_name = NamedCatalogEntry.model_validate(tech).name
 
             addon_name = None
             if "addons" in selected:
-                addon_name = NamedCatalogEntry.model_validate(
-                    self.catalog_repo.get_random_addon()
-                ).name
+                addon = self._pick_random_addon()
+                if addon is not None:
+                    addon_name = NamedCatalogEntry.model_validate(addon).name
 
             result.append(
                 Extras(
@@ -253,20 +332,27 @@ class ProjectGeneratorService:
             )
         return result
 
-    def _fill_extra(self, extra: Extras) -> Extras:
+    def _fill_extra(self, extra: Extras, excluded: set[str] | None = None) -> Extras:
+        excluded = excluded or set()
         lang_name = extra.programming_language
         if not lang_name or lang_name == "string":
-            lang = self.catalog_repo.get_random_programming_language()
+            lang = self._pick_random_programming_language(excluded)
+            lang_name = lang.name if lang else None
+        elif self._is_excluded(lang_name, excluded):
+            lang = self._pick_random_programming_language(excluded)
             lang_name = lang.name if lang else None
 
         tech_name = extra.technologies
         if not tech_name or tech_name == "string":
-            tech = self.catalog_repo.get_random_technology()
+            tech = self._pick_random_technology(excluded)
+            tech_name = tech.name if tech else None
+        elif self._is_excluded(tech_name, excluded):
+            tech = self._pick_random_technology(excluded)
             tech_name = tech.name if tech else None
 
         addon_name = extra.addons
         if not addon_name or addon_name == "string":
-            addon = self.catalog_repo.get_random_addon()
+            addon = self._pick_random_addon()
             addon_name = addon.name if addon else None
 
         return Extras(
@@ -274,3 +360,25 @@ class ProjectGeneratorService:
             technologies=tech_name,
             addons=addon_name,
         )
+
+    def _normalize_excluded(self, values: list[str] | None) -> set[str]:
+        if not values:
+            return set()
+        known = {
+            str(getattr(item, "name", "")).strip().lower()
+            for items in (
+                self.catalog_repo.get_programming_languages(),
+                self.catalog_repo.get_technologies(),
+            )
+            for item in items
+            if item is not None
+        }
+        return {
+            str(value).strip().lower()
+            for value in values
+            if isinstance(value, str) and str(value).strip().lower() in known
+        }
+
+    @staticmethod
+    def _is_excluded(value: str | None, excluded: set[str]) -> bool:
+        return bool(value) and str(value).strip().lower() in excluded

@@ -87,10 +87,10 @@ export const api = {
       method: "DELETE",
     }),
 
-  generateByLevel: (level: number) =>
+  generateByLevel: (level: number, excluded: string[] = []) =>
     request<Project>(`${BASE}/ensemble_project/generate_project_by_level`, {
       method: "POST",
-      body: JSON.stringify({ level }),
+      body: JSON.stringify({ level, excluded }),
     }),
 
   generateByValue: (payload: {
@@ -98,6 +98,7 @@ export const api = {
     technologies: string;
     addons: string;
     level: number;
+    excluded?: string[];
   }) =>
     request<Project>(`${BASE}/ensemble_project/generate_project_by_value`, {
       method: "POST",
@@ -106,7 +107,8 @@ export const api = {
         technologies: payload.technologies,
         addons: payload.addons,
         extras: [],
-        level: { level: payload.level },
+        excluded: payload.excluded ?? [],
+        level: { level: payload.level, excluded: payload.excluded ?? [] },
       }),
     }),
 };

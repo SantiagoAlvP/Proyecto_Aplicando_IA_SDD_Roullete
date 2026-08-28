@@ -6,6 +6,8 @@ import { ResultCard } from "./components/ResultCard";
 import { SlotMachine } from "./components/SlotMachine";
 import type {
   CatalogEntry,
+  ExcludedCatalog,
+  ExcludableReelKey,
   HistoryEntry,
   Project,
   ReelKey,
@@ -26,6 +28,23 @@ const EMPTY_CATALOG: Record<ReelKey, CatalogEntry[]> = {
   addons: [],
 };
 
+const EMPTY_EXCLUDED: ExcludedCatalog = {
+  programming_language: [],
+  technologies: [],
+};
+
+const EXCLUDED_STORAGE_KEY = "project-jackpot:excluded";
+
+function normalizedNames(values: unknown): string[] {
+  if (!Array.isArray(values)) return [];
+  return [...new Set(
+    values
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  )];
+}
+
 export default function App() {
   const [catalog, setCatalog] = useState(EMPTY_CATALOG);
   const [reels, setReels] = useState<ReelsState>(EMPTY_REELS);
@@ -33,6 +52,7 @@ export default function App() {
   const [project, setProject] = useState<Project | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [favorites, setFavorites] = useState<HistoryEntry[]>([]);
+  const [excluded, setExcluded] = useState<ExcludedCatalog>(EMPTY_EXCLUDED);
   const [activeTab, setActiveTab] = useState<"history" | "favorites">("history");
   const [pendingFavoriteId, setPendingFavoriteId] = useState<number | null>(null);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
@@ -43,10 +63,39 @@ export default function App() {
   // disabled button - each spin costs an LLM call.
   const inFlight = useRef(false);
 
+  const filteredCatalog = {
+    programming_language: catalog.programming_language.filter(
+      ({ name }) => !excluded.programming_language.some((item) => item.toLowerCase() === name.toLowerCase()),
+    ),
+    technologies: catalog.technologies.filter(
+      ({ name }) => !excluded.technologies.some((item) => item.toLowerCase() === name.toLowerCase()),
+    ),
+    addons: catalog.addons,
+  };
+
   const catalogReady =
-    catalog.programming_language.length > 0 &&
-    catalog.technologies.length > 0 &&
-    catalog.addons.length > 0;
+    filteredCatalog.programming_language.length > 0 &&
+    filteredCatalog.technologies.length > 0 &&
+    filteredCatalog.addons.length > 0;
+  const catalogLoaded = Object.values(catalog).every((items) => items.length > 0);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(EXCLUDED_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Partial<ExcludedCatalog>;
+      setExcluded({
+        programming_language: normalizedNames(parsed.programming_language),
+        technologies: normalizedNames(parsed.technologies),
+      });
+    } catch {
+      // Ignore malformed localStorage values and fall back to the default state.
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(EXCLUDED_STORAGE_KEY, JSON.stringify(excluded));
+  }, [excluded]);
 
   const refreshHistory = useCallback(async () => {
     try {
@@ -139,6 +188,39 @@ export default function App() {
     }));
   }
 
+  function toggleExclude(key: ExcludableReelKey, value: string) {
+    if (!value) return;
+
+    setExcluded((current) => {
+      const list = current[key];
+      const next = list.includes(value)
+        ? list.filter((item) => item !== value)
+        : [...list, value];
+
+      setReels((reelState) => {
+        const candidate = reelState[key].value;
+        if (!candidate || !next.some((item) => item.toLowerCase() === candidate.toLowerCase())) {
+          return reelState;
+        }
+        return {
+          ...reelState,
+          [key]: { value: "", locked: false },
+        };
+      });
+
+      return {
+        ...current,
+        [key]: next,
+      };
+    });
+  }
+
+  function clearExcluded() {
+    setExcluded(EMPTY_EXCLUDED);
+  }
+
+  const allExcluded = Object.values(excluded).flat();
+
   async function spin() {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -148,6 +230,7 @@ export default function App() {
 
     const started = Date.now();
     try {
+        const excludedValues = allExcluded;
       const anyLocked = (Object.keys(reels) as ReelKey[]).some(
         (key) => reels[key].locked && reels[key].value !== "",
       );
@@ -158,8 +241,9 @@ export default function App() {
             technologies: lockedValue(reels, "technologies"),
             addons: lockedValue(reels, "addons"),
             level,
+              excluded: excludedValues,
           })
-        : await api.generateByLevel(level);
+          : await api.generateByLevel(level, excludedValues);
 
       // Let the reels finish their animation even when the API is instant,
       // otherwise the result appears before the machine looks like it spun.
@@ -199,13 +283,18 @@ export default function App() {
         <div className="page__machine">
           <SlotMachine
             reels={reels}
-            catalog={catalog}
+            catalog={filteredCatalog}
+            allCatalog={catalog}
+            excluded={excluded}
             level={level}
             spinning={spinning}
             catalogReady={catalogReady}
+            catalogLoaded={catalogLoaded}
             onToggleLock={toggleLock}
             onChangeReel={changeReel}
             onChangeLevel={setLevel}
+            onToggleExclude={toggleExclude}
+            onClearExcluded={clearExcluded}
             onSpin={() => void spin()}
           />
 

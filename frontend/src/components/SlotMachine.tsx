@@ -1,15 +1,20 @@
 import { Reel } from "./Reel";
-import type { CatalogEntry, ReelKey, ReelsState } from "../types";
+import type { CatalogEntry, ExcludedCatalog, ExcludableReelKey, ReelKey, ReelsState } from "../types";
 
 interface SlotMachineProps {
   reels: ReelsState;
   catalog: Record<ReelKey, CatalogEntry[]>;
+  allCatalog: Record<ReelKey, CatalogEntry[]>;
+  excluded: ExcludedCatalog;
   level: number;
   spinning: boolean;
   catalogReady: boolean;
+  catalogLoaded: boolean;
   onToggleLock: (key: ReelKey) => void;
   onChangeReel: (key: ReelKey, value: string) => void;
   onChangeLevel: (level: number) => void;
+  onToggleExclude: (key: ExcludableReelKey, value: string) => void;
+  onClearExcluded: () => void;
   onSpin: () => void;
 }
 
@@ -19,15 +24,25 @@ const REELS: { key: ReelKey; label: string }[] = [
   { key: "addons", label: "Addon" },
 ];
 
+const EXCLUDABLE_REELS: { key: ExcludableReelKey; label: string }[] = [
+  { key: "programming_language", label: "Lenguaje" },
+  { key: "technologies", label: "Tecnología" },
+];
+
 export function SlotMachine({
   reels,
   catalog,
+  allCatalog,
+  excluded,
   level,
   spinning,
   catalogReady,
+  catalogLoaded,
   onToggleLock,
   onChangeReel,
   onChangeLevel,
+  onToggleExclude,
+  onClearExcluded,
   onSpin,
 }: SlotMachineProps) {
   return (
@@ -70,8 +85,52 @@ export function SlotMachine({
              from spending two LLM calls (HU-07, T016). */
           disabled={spinning || !catalogReady}
         >
-          {spinning ? "Girando…" : catalogReady ? "¡Girar!" : "Cargando…"}
+          {spinning
+            ? "Girando…"
+            : !catalogLoaded
+              ? "Cargando…"
+              : catalogReady
+                ? "¡Girar!"
+                : "Retira una exclusión"}
         </button>
+      </div>
+
+      {catalogLoaded && !catalogReady && (
+        <p className="machine__filter-warning" role="status">
+          Necesitas dejar al menos un lenguaje y una tecnología disponibles.
+        </p>
+      )}
+
+      <div className="machine__filters" aria-label="Filtros de exclusión">
+        <div className="machine__filters-header">
+          <strong>Excluir</strong>
+          <button type="button" onClick={onClearExcluded} disabled={spinning}>
+            Limpiar
+          </button>
+        </div>
+
+        {EXCLUDABLE_REELS.map(({ key, label }) => (
+          <div key={key} className="machine__filter-group">
+            <div className="machine__filter-label">{label}</div>
+            <div className="machine__filter-list">
+              {allCatalog[key].length === 0 && <span className="machine__filter-empty">Sin opciones disponibles</span>}
+              {allCatalog[key].map(({ name }) => {
+                const blocked = excluded[key].includes(name);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    className={blocked ? "machine__filter-chip machine__filter-chip--blocked" : "machine__filter-chip"}
+                    onClick={() => onToggleExclude(key, name)}
+                    disabled={spinning}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

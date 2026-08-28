@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 ENDPOINT = "/api/v1/ensemble_project/generate_project_by_level"
 
@@ -55,6 +56,45 @@ def test_choose_valid_project_is_called(client_with_mocks):
     client.post(ENDPOINT, json={"level": 3})
 
     ai_gw.choose_valid_project.assert_awaited_once()
+
+
+def test_excluded_language_is_not_used_in_level_candidates(client_with_mocks):
+    client, ai_gw, catalog, _ = client_with_mocks
+
+    def named(value):
+        return SimpleNamespace(name=value)
+
+    catalog.get_programming_languages.return_value = [named("Python"), named("Rust")]
+    catalog.get_technologies.return_value = [named("FastAPI")]
+    catalog.get_addons.return_value = [named("PostgreSQL")]
+
+    response = client.post(
+        ENDPOINT,
+        json={"level": 1, "excluded": ["Rust"]},
+    )
+
+    assert response.status_code == 201
+    candidates = ai_gw.choose_valid_project.call_args[0][0]
+    assert all(candidate["programming_language"] != "Rust" for candidate in candidates)
+    assert all(
+        extra["programming_language"] != "Rust"
+        for candidate in candidates
+        for extra in candidate["extras"]
+    )
+
+
+def test_all_excluded_languages_return_controlled_validation_error(client_with_mocks):
+    client, _, catalog, _ = client_with_mocks
+
+    language = SimpleNamespace(name="Python")
+    catalog.get_programming_languages.return_value = [language]
+
+    response = client.post(
+        ENDPOINT,
+        json={"level": 1, "excluded": ["Python"]},
+    )
+
+    assert response.status_code == 422
 
 
 def test_candidates_count_matches_settings(client_with_mocks):

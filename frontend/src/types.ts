@@ -37,6 +37,29 @@ export interface HistoryEntry {
 
 export type ReelKey = "programming_language" | "technologies" | "addons";
 
+export type ExcludableReelKey = Exclude<ReelKey, "addons">;
+
+export type ExcludedCatalog = Record<ExcludableReelKey, string[]>;
+
+export type StatisticsCategory =
+  | "programming_language"
+  | "technology"
+  | "addon";
+
+export interface StatisticsEntry {
+  category: StatisticsCategory;
+  label: string;
+  count: number;
+  share: number;
+  rank: number;
+}
+
+export interface StatisticsResponse {
+  total_projects: number;
+  generated_at: string;
+  items: StatisticsEntry[];
+}
+
 export interface ReelState {
   value: string;
   locked: boolean;

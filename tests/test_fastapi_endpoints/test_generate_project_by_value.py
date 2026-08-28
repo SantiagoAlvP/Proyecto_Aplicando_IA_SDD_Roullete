@@ -1,4 +1,5 @@
 from core.ensemble_project.api.ensemble_project_models import ProjectSelection
+from unittest.mock import MagicMock
 
 ENDPOINT = "/api/v1/ensemble_project/generate_project_by_value"
 
@@ -84,6 +85,56 @@ def test_description_is_persisted(client_with_mocks):
     client.post(ENDPOINT, json=VALID_PAYLOAD)
     saved = project_repo.save_project.call_args[0][0]
     assert saved["description"] == "Custom description."
+
+
+def test_excluded_values_are_ignored_when_randomising_reels(client_with_mocks):
+    client, _, catalog, project_repo = client_with_mocks
+    excluded = ["Rust", "Docker", "Sublime Text"]
+
+    def named(value: str):
+        item = MagicMock()
+        item.name = value
+        return item
+
+    catalog.get_programming_languages.return_value = [
+        named("Python"),
+        named("Rust"),
+    ]
+    catalog.get_technologies.return_value = [
+        named("FastAPI"),
+        named("Docker"),
+    ]
+    catalog.get_addons.return_value = [
+        named("PostgreSQL"),
+        named("Sublime Text"),
+    ]
+
+    client.post(
+        ENDPOINT,
+        json={
+            **VALID_PAYLOAD,
+            "programming_language": "",
+            "technologies": "",
+            "addons": "",
+            "excluded": excluded,
+        },
+    )
+
+    saved = project_repo.save_project.call_args[0][0]
+    assert saved["programming_language"] == "Python"
+    assert saved["technologies"] == "FastAPI"
+    assert saved["addons"] in {"PostgreSQL", "Sublime Text"}
+
+
+def test_excluded_list_is_bounded(client_with_mocks):
+    client, _, _, _ = client_with_mocks
+
+    response = client.post(
+        ENDPOINT,
+        json={**VALID_PAYLOAD, "excluded": [f"value-{index}" for index in range(51)]},
+    )
+
+    assert response.status_code == 422
 
 
 def test_project_repo_save_called_once(client_with_mocks):

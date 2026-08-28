@@ -7,6 +7,8 @@ before the service runs and therefore before a single LLM token is spent
 """
 
 from collections.abc import Sequence
+from typing import Annotated
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,12 +17,15 @@ MAX_EXTRAS = 20
 MAX_DESCRIPTION_LENGTH = 500
 MIN_LEVEL = 1
 MAX_LEVEL = 5
+MAX_EXCLUDED = 50
 
 CatalogName = Field(default=None, max_length=MAX_NAME_LENGTH)
+ExcludedName = Annotated[str, Field(max_length=MAX_NAME_LENGTH)]
 
 
 class Level(BaseModel):
     level: int = Field(ge=MIN_LEVEL, le=MAX_LEVEL)
+    excluded: list[ExcludedName] = Field(default_factory=list, max_length=MAX_EXCLUDED)
 
 
 class Extras(BaseModel):
@@ -37,6 +42,7 @@ class GenerateProjectByValueRequest(BaseModel):
     technologies: str = Field(max_length=MAX_NAME_LENGTH)
     addons: str = Field(max_length=MAX_NAME_LENGTH)
     extras: Sequence[Extras] = Field(default_factory=list, max_length=MAX_EXTRAS)
+    excluded: list[ExcludedName] = Field(default_factory=list, max_length=MAX_EXCLUDED)
     level: Level
 
 
@@ -68,6 +74,20 @@ class HistoryEntry(BaseModel):
     extras: list[Extras] = []
     description: str
     favorite: bool = False
+
+
+class StatisticsEntry(BaseModel):
+    category: str
+    label: str
+    count: int = Field(ge=0)
+    share: float = Field(ge=0.0, le=1.0)
+    rank: int = Field(ge=1)
+
+
+class StatisticsResponse(BaseModel):
+    total_projects: int = Field(ge=0)
+    generated_at: datetime
+    items: list[StatisticsEntry] = []
 
 
 class ValidationResult(BaseModel):
